@@ -1,0 +1,28 @@
+{
+  "fitness_creator_1": [
+    {
+      "video_id": "v1",
+      "duration_sec": 28,
+      "format": "talking_head",
+      "has_voice": true,
+      "has_text": true,
+      "likes": 12034
+    },
+    {
+      "video_id": "v2",
+      "duration_sec": 31,
+      "format": "talking_head",
+      "has_voice": true,
+      "has_text": false,
+      "likes": 9850
+    },
+    {
+      "video_id": "v3",
+      "duration_sec": 22,
+      "format": "voiceover_with_broll",
+      "has_voice": true,
+      "has_text": true,
+      "likes": 15320
+    }
+  ]
+}
