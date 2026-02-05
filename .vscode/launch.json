@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Format Classification (module)",
+      "type": "python",
+      "request": "launch",
+      "module": "profiling.dev.run_format_classification",
+      "args": [
+        "--creator",
+        "expoparker",
+        "--limit",
+        "5"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}
