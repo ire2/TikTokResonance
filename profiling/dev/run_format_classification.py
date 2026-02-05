@@ -2,7 +2,7 @@ import argparse
 
 from profiling.ingestion.fetch_raw import fetch_raw_videos
 from profiling.ingestion.normalize import normalize_videos
-from profiling.cv.format_classifier import classify_format
+from profiling.cv.simple_classifier import SimpleFormatClassifier
 
 
 def main():
@@ -19,7 +19,7 @@ def main():
     normalized = normalize_videos(raw_videos)
 
     for v in normalized:
-        v["format"] = classifier.classify(v)
+        # v["format"] = classifier.classify(v)
         print(
             f"{v['video_id']} | "
             f"{v['duration_sec']}s | "

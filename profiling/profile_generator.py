@@ -2,8 +2,10 @@ import json
 import yaml
 from collections import Counter
 from statistics import mean
+from utils.trace import trace
 
 
+@trace
 def generate_profile(creator_id: str, raw_data_path: str) -> dict:
     with open(raw_data_path, "r") as f:
         data = json.load(f)

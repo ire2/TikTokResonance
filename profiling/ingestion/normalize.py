@@ -1,4 +1,5 @@
 
+from utils.trace import trace
 from profiling.cv.simple_classifier import SimpleFormatClassifier
 
 classifier = SimpleFormatClassifier()
@@ -31,6 +32,7 @@ classifier = SimpleFormatClassifier()
 #     return "other"
 
 
+@trace
 def normalize_videos(raw_videos):
     """
     Convert raw yt-dlp video objects into our internal raw_data schema.
@@ -47,6 +49,7 @@ def normalize_videos(raw_videos):
     for v in raw_videos:
         normalized.append({
             "video_id": v.get("id"),
+            "local_path": v.get("local_path"),
             "duration_sec": v.get("duration"),
             "likes": v.get("like_count"),
             "views": v.get("view_count"),
@@ -54,6 +57,7 @@ def normalize_videos(raw_videos):
             "has_voice": v.get("acodec") not in (None, "none"),
             "has_text": bool(v.get("description")),
             "format": classifier.classify(v),
+            'description': v.get("description"),
             "posted_at": v.get("upload_date"),
         })
 

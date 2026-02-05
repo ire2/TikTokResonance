@@ -1,3 +1,4 @@
+from utils.trace import trace
 from .format_classifier import FormatClassifier
 
 
@@ -7,6 +8,7 @@ class SimpleFormatClassifier(FormatClassifier):
     Designed to be replaced by CV model.
     """
 
+    @trace
     def classify(self, video):
         # Presence of audio
         has_audio = video.get("acodec") not in (None, "none")
