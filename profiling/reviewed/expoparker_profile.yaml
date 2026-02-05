@@ -1,0 +1,21 @@
+creator_id: expoparker
+review_status: approved
+reviewed_at: '2026-02-05T21:32:31.304049'
+reviewer: human
+profile:
+  creator_id: expoparker
+  generated_by: ConstraintSpace Profiling v0.1
+  status: draft
+  analysis_window: last_30_videos
+  observed_patterns:
+    dominant_formats:
+    - talking_head
+    underused_formats: []
+    avg_duration_sec: 24.9
+  modality_bias:
+    voice: high
+    text: high
+  creative_interpretation:
+    summary: Creator shows strong preference for consistent explanatory formats. Format
+      repetition suggests opportunity for low-risk experimentation.
+  human_review_required: true
