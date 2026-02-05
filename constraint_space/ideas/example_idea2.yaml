@@ -1,0 +1,16 @@
+idea_id: idea_001
+title: "Explaining X in 10 minutes"
+description: >
+  A fast-paced explanatory video breaking down concept X using
+  on-screen text and voiceover.
+
+intent:
+  goal: entertain
+  tone: joking
+  risk_level: high
+
+format_hypothesis:
+  duration_sec: 600
+  has_voice: true
+  has_text: true
+  format: talking_head
