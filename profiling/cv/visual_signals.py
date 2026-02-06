@@ -4,6 +4,7 @@ import numpy as np
 from profiling.cv.frame_sampler import sample_frames
 from profiling.cv.face_detector import detect_faces
 from utils.trace import trace
+from profiling.cv.motion import compute_motion_intensity
 
 
 @trace
@@ -75,4 +76,5 @@ def extract_visual_signals(
         "max_faces": int(max_faces),
         "talking_head_confidence": float(round(talking_head_confidence, 3)),
         "face_area_stability": float(round(face_area_stability, 3)),
+        "motion_intensity": float(round(compute_motion_intensity(frames), 3))
     }

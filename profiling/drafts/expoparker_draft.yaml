@@ -19,8 +19,8 @@ nlp_captioning_gate:
   weight: 1.0
   confidence: high
   reason: consistent talking-head presence
-creative_interpretation:
-  summary: Creator behavior inferred using both metadata and computer vision signals.
-    Visual consistency suggests dominant content structure with room for controlled
-    experimentation.
+profile_nlp:
+  dialogue_video_ratio: 1.0
+  solo_rant_ratio: 0.2
+  avg_speakers: 3.17
 human_review_required: true
