@@ -10,7 +10,17 @@ observed_patterns:
 modality_bias:
   voice: high
   text: high
+visual_signals:
+  avg_face_presence_ratio: 0.783
+  avg_talking_head_confidence: 0.808
+  avg_motion_intensity: null
+  avg_face_area_stability: 0.137
+nlp_captioning_gate:
+  weight: 1.0
+  confidence: high
+  reason: consistent talking-head presence
 creative_interpretation:
-  summary: Creator shows strong preference for consistent explanatory formats. Format
-    repetition suggests opportunity for low-risk experimentation.
+  summary: Creator behavior inferred using both metadata and computer vision signals.
+    Visual consistency suggests dominant content structure with room for controlled
+    experimentation.
 human_review_required: true

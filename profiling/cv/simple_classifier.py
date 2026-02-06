@@ -4,8 +4,10 @@ from .format_classifier import FormatClassifier
 
 class SimpleFormatClassifier(FormatClassifier):
     """
-    v1 classifier using cheap signals.
-    Designed to be replaced by CV model.
+    LEGACY FORMAT CLASSIFIER (metadata-only)
+
+    Used only when CV signals are unavailable.
+    DO NOT extend this class further.
     """
 
     @trace

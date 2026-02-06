@@ -1,0 +1,27 @@
+# -----------------------------
+# Core utilities
+# -----------------------------
+pyyaml
+numpy
+
+# -----------------------------
+# Computer Vision
+# -----------------------------
+opencv-python
+
+# -----------------------------
+# Video ingestion / metadata
+# -----------------------------
+yt-dlp
+
+# -----------------------------
+# ASR (optional but supported)
+# -----------------------------
+openai-whisper
+torch
+ffmpeg-python
+
+# -----------------------------
+# Development / testing
+# -----------------------------
+pytest
