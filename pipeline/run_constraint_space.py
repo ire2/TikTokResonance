@@ -3,11 +3,11 @@ import yaml
 import shutil
 import os
 
-from constraint_space.select_ideas import select_ideas
-from engine.human_review import human_review_checkpoint
+from resonance.select_ideas import select_ideas
+from pipeline.human_review import human_review_checkpoint
 from profiling.run_pipeline import run_profiling_for_creator
-from constraint_space.build_constraints import build_constraints
-from constraint_space.evaluate_idea import evaluate_idea_against_constraints
+from resonance.build_constraints import build_constraints
+from resonance.evaluate_idea import evaluate_idea_against_constraints
 
 CLEAN_RUN = os.getenv("CLEAN_RUN", "false").lower() == "true"
 BASE_DIR = Path(__file__).resolve().parent.parent

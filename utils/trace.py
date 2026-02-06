@@ -10,7 +10,9 @@ _TAG_PREFIXES = {
     "utils": "UTILS",
     "profiling.dev": "DEV",
     "profiling.profile_generator": "PROFILE GEN",
-    "profiling.nlp": "NLP"
+    "profiling.nlp": "NLP",
+    "profiling.embedding": "EMBEDDING",
+    "profiling.resonance": "RESONANCE"
 }
 
 

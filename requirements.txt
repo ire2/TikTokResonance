@@ -2,7 +2,7 @@
 # Core utilities
 # -----------------------------
 pyyaml
-numpy
+numpy<2
 
 # -----------------------------
 # Computer Vision
@@ -22,6 +22,14 @@ torch
 ffmpeg-python
 
 # -----------------------------
+# Embeddings / NLP
+# -----------------------------
+sentence-transformers
+scikit-learn
+scipy
+
+# -----------------------------
 # Development / testing
 # -----------------------------
 pytest
+tqdm

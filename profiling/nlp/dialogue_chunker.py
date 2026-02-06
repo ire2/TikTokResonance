@@ -7,17 +7,19 @@ from utils.trace import trace
 @trace
 def chunk_dialogue(
     transcript: Dict,
-    merge_gap_sec: float = 0.8,
-    break_gap_sec: float = 1.2,
+    merge_gap_sec: float = 1.5,
+    break_gap_sec: float = 2.5,
+    min_chars: int = 80,
 ) -> Dict:
     """
-    Convert transcript segments into dialogue units.
+    Convert transcript segments into semantic dialogue beats.
 
-    - merge_gap_sec: max silence to merge lines
-    - break_gap_sec: silence that implies a new beat
+    - merge_gap_sec: silence allowed within a beat
+    - break_gap_sec: silence that strongly implies topic shift
+    - min_chars: force-merge short beats to preserve meaning
     """
 
-    segments = transcript["segments"]
+    segments = transcript.get("segments", [])
     if not segments:
         return {**transcript, "dialogue": []}
 
@@ -28,18 +30,21 @@ def chunk_dialogue(
         "end": segments[0]["end"],
         "text": segments[0]["text"],
         "pause_before": 0.0,
+        "duration": segments[0]["end"] - segments[0]["start"]
     }
 
     for prev, seg in zip(segments, segments[1:]):
         gap = seg["start"] - prev["end"]
 
-        if gap <= merge_gap_sec:
-            # same beat
+        should_merge = (
+            gap <= merge_gap_sec
+            or len(current["text"]) < min_chars
+        )
+
+        if should_merge:
             current["end"] = seg["end"]
             current["text"] += " " + seg["text"]
-
         else:
-            # close current beat
             dialogue.append(current)
 
             current = {

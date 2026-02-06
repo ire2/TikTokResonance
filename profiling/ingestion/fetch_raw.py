@@ -7,7 +7,7 @@ from utils.trace import trace
 
 
 # Canonical location for raw videos
-RAW_VIDEO_DIR = Path("profiling/raw_videos")
+RAW_VIDEO_DIR = Path("profiling/metadata/raw_videos")
 RAW_VIDEO_DIR.mkdir(parents=True, exist_ok=True)
 
 

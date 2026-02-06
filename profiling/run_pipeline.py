@@ -14,7 +14,7 @@ from .profile_generator import generate_profile, write_profile
 BASE_DIR = Path(__file__).resolve().parent
 
 INPUT_PATH = BASE_DIR / "input" / "creators.yaml"
-RAW_DATA_PATH = BASE_DIR / "raw_data" / "creator_metadata.json"
+RAW_DATA_PATH = BASE_DIR / "metadata" / "raw_data" / "creator_metadata.json"
 DRAFTS_DIR = BASE_DIR / "drafts"
 
 CLEAN_RUN = os.getenv("CLEAN_RUN", "false").lower() == "true"

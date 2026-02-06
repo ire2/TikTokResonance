@@ -5,7 +5,7 @@ from profiling.cv.frame_sampler import sample_frames
 from profiling.cv.face_detector import detect_faces
 
 
-RAW_VIDEO_DIR = Path("profiling/raw_videos")
+RAW_VIDEO_DIR = Path("profiling//metadata/raw_videos")
 DEBUG_DIR = Path("profiling/dev/debug_faces")
 DEBUG_DIR.mkdir(exist_ok=True)
 

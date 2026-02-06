@@ -5,7 +5,8 @@ from profiling.nlp.run_nlp import run_nlp_for_creator
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
-RAW_DATA_PATH = BASE_DIR / "profiling" / "raw_data" / "creator_metadata.json"
+RAW_DATA_PATH = BASE_DIR / "profiling" / \
+    "metadata" / "raw_data" / "creator_metadata.json"
 PROFILE_PATH = BASE_DIR / "profiling" / "drafts" / "expoparker_draft.yaml"
 
 

@@ -11,16 +11,21 @@ modality_bias:
   voice: high
   text: high
 visual_signals:
-  avg_face_presence_ratio: 0.783
-  avg_talking_head_confidence: 0.808
+  avg_face_presence_ratio: null
+  avg_talking_head_confidence: null
   avg_motion_intensity: null
-  avg_face_area_stability: 0.137
+  avg_face_area_stability: null
 nlp_captioning_gate:
-  weight: 1.0
-  confidence: high
-  reason: consistent talking-head presence
+  weight: 0.5
+  confidence: low
+  reason: insufficient CV data
 profile_nlp:
   dialogue_video_ratio: 1.0
   solo_rant_ratio: 0.2
   avg_speakers: 3.17
+creator_embedding:
+  model: all-MiniLM-L6-v2
+  dim: 384
+  num_segments: 36
+  has_segment_memory: false
 human_review_required: true

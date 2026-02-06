@@ -1,7 +1,7 @@
 from pathlib import Path
 from profiling.cv.visual_signals import extract_visual_signals
 
-RAW_VIDEO_DIR = Path("profiling/raw_videos")
+RAW_VIDEO_DIR = Path("profiling/metadata/raw_videos")
 
 
 def main():

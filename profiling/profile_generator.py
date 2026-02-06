@@ -1,11 +1,13 @@
 import json
 import yaml
-from utils.trace import trace
 from pathlib import Path
+from utils.trace import trace
+
 from profiling.profile.visual_profile import compute_visual_profile
 from profiling.profile.nlp_profile import compute_nlp_profile
 from profiling.profile.metadata_profile import compute_metadata_profile
 from profiling.profile.nlp_gate import compute_nlp_gate
+from profiling.embedding.embedding_store import load_creator_embeddings
 
 
 @trace
@@ -13,13 +15,19 @@ def generate_profile(creator_id: str, raw_data_path: str) -> dict:
     data = json.load(open(raw_data_path))
     videos = data[creator_id]
 
+    # ---- compute components ----
     visual = compute_visual_profile(creator_id, videos)
     nlp = compute_nlp_profile(creator_id, videos)
     meta = compute_metadata_profile(videos)
-
     gate = compute_nlp_gate(visual)
 
-    return {
+    embedding_meta = load_creator_embeddings(
+        creator_id=creator_id,
+        model_name="all-MiniLM-L6-v2",
+    )
+
+    # ---- assemble profile ----
+    profile = {
         "creator_id": creator_id,
         "generated_by": "ConstraintSpace Profiling v0.1",
         "status": "draft",
@@ -40,8 +48,22 @@ def generate_profile(creator_id: str, raw_data_path: str) -> dict:
         "nlp_captioning_gate": gate,
         "profile_nlp": nlp,
 
+        # 👇 semantic memory summary (NOT the vectors themselves)
+        "creator_embedding": (
+            {
+                "model": embedding_meta["model"],
+                "dim": embedding_meta["dim"],
+                "num_segments": embedding_meta["num_segments"],
+                "has_segment_memory": bool(embedding_meta["segments"]),
+            }
+            if embedding_meta
+            else None
+        ),
+
         "human_review_required": True,
     }
+
+    return profile
 
 
 @trace

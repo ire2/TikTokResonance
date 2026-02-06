@@ -7,7 +7,7 @@ from .normalize import normalize_videos
 
 
 BASE_DIR = Path(__file__).resolve().parents[1]
-RAW_DATA_DIR = BASE_DIR / "raw_data"
+RAW_DATA_DIR = BASE_DIR / "metadata" / "raw_data"
 RAW_DATA_PATH = RAW_DATA_DIR / "creator_metadata.json"
 
 
