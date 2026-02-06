@@ -4,8 +4,8 @@ __pycache__/
 *$py.class
 
 #fluff files
-profiling/raw_videos/*.mp4
-profiling/raw_captions/*.json
+profiling/metadata/
+
 
 # C extensions
 *.so
