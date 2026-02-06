@@ -3,7 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-*.mp4
+#fluff files
+profiling/raw_videos/*.mp4
+profiling/raw_captions/*.json
+
 # C extensions
 *.so
 
