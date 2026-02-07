@@ -5,6 +5,7 @@ import os
 
 from profiling.ingestion.ingest_creator import ingest_creator
 from .profile_generator import generate_profile, write_profile
+from profiling.dev.generate_label_queue import main as generate_label_queue
 
 
 # ------------------------
@@ -18,6 +19,7 @@ RAW_DATA_PATH = BASE_DIR / "metadata" / "raw_data" / "creator_metadata.json"
 DRAFTS_DIR = BASE_DIR / "drafts"
 
 CLEAN_RUN = os.getenv("CLEAN_RUN", "false").lower() == "true"
+GENERATE_LABELS = os.getenv("GENERATE_LABELS", "false").lower() == "true"
 
 
 # ------------------------
@@ -64,6 +66,11 @@ def run_profiling_for_creator(creator_id: str, video_limit: int = 30) -> Path:
     write_profile(profile, output_path)
 
     print(f"Draft profile written → {output_path}")
+
+    if GENERATE_LABELS:
+        print("[LABELS] Generating label queue...")
+        generate_label_queue()
+
     return output_path
 
 

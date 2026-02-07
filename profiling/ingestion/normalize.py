@@ -2,7 +2,7 @@
 from utils.trace import trace
 from profiling.cv.simple_classifier import SimpleFormatClassifier
 
-classifier = SimpleFormatClassifier()
+classifier = SimpleFormatClassifier()  # global instance for simplicity
 
 # DEFUNCT
 # def infer_format(v):

@@ -6,17 +6,21 @@ from profiling.resonance.idea_encoder import encode_idea
 from profiling.resonance.resonance_score import compute_resonance
 from profiling.resonance.resonance_report import build_resonance_report
 from profiling.embedding.embedding_store import load_creator_embeddings
+from profiling.utils.creator_config import (
+    get_active_creator,
+    get_default_model_name,
+)
 
 
 # ---------------- CONFIG ----------------
-CREATOR_ID = "expoparker"
-MODEL_NAME = "BAAI/bge-large-en-v1.5"
-
-PROFILE_PATH = Path("profiling/drafts/expoparker_draft.yaml")
+BASE_DIR = Path(__file__).resolve().parents[2]
+CREATOR_ID = get_active_creator()
+MODEL_NAME = get_default_model_name()
+PROFILE_PATH = BASE_DIR / "profiling" / "drafts" / f"{CREATOR_ID}_draft.yaml"
+IDEA_MOTION_INTENSITY = 0.2
 
 IDEA_TEXT = """
-Awkward public interaction where the guy misunderstands a normal request
-and escalates it into an uncomfortable flirt, then gets called out.
+Mukbang sushi. Mukbang is a genre of social media content where creators eat large quantities of food while interacting with their audience. Sushi is a popular type of Japanese cuisine that typically consists of vinegared rice, seafood, and vegetables. A "mukbang sushi" video would likely feature a creator eating various types of sushi while engaging with their viewers.
 """
 # --------------------------------------
 
@@ -46,6 +50,7 @@ def main():
         idea_embedding=idea["embedding"],
         creator_embedding_payload=creator_embedding_payload,
         creator_profile=creator_profile,
+        idea_motion_intensity=IDEA_MOTION_INTENSITY,
     )
 
     report = build_resonance_report(

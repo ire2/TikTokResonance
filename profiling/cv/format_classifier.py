@@ -16,6 +16,7 @@ class FormatClassifier:
         - voiceover
         - broll
         - text_heavy
+        - dance
         - mixed
         - unknown
         """

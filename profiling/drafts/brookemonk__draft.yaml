@@ -1,0 +1,38 @@
+creator_id: brookemonk_
+generated_by: ConstraintSpace Profiling v0.1
+status: draft
+analysis_window: last_30_videos
+observed_patterns:
+  dominant_formats: []
+  underused_formats:
+  - broll
+  avg_duration_sec: 35.1
+modality_bias:
+  voice: high
+  text: medium
+visual_signals:
+  avg_face_presence_ratio: 0.871
+  avg_talking_head_confidence: 0.891
+  avg_motion_intensity: 0.037
+  avg_face_area_stability: 0.453
+  avg_face_area_ratio: 0.028
+  avg_face_area_ratio_std: 0.016
+  avg_brightness_mean: 0.534
+  avg_brightness_std: 0.023
+  avg_saturation_mean: 0.218
+  avg_color_temperature_index: -0.066
+  avg_edge_density: 0.027
+  avg_text_density_heuristic: 0.45
+  avg_shot_change_rate: 0.002
+  avg_camera_motion_intensity: 0.132
+  avg_camera_stability: 0.868
+nlp_captioning_gate:
+  weight: 1.0
+  confidence: high
+  reason: consistent talking-head presence
+profile_nlp:
+  dialogue_video_ratio: 0.9
+  solo_rant_ratio: 0.963
+  avg_speakers: 1.04
+creator_embedding: null
+human_review_required: true

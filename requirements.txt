@@ -8,6 +8,10 @@ numpy<2
 # Computer Vision
 # -----------------------------
 opencv-python
+easyocr
+ultralytics
+librosa
+
 
 # -----------------------------
 # Video ingestion / metadata
@@ -33,3 +37,6 @@ scipy
 # -----------------------------
 pytest
 tqdm
+fastapi
+uvicorn
+python-multipart

@@ -3,6 +3,12 @@ import json
 from pathlib import Path
 
 from .fetch_raw import fetch_raw_videos
+from profiling.utils.creator_config import (
+    get_default_scan_limit,
+    get_selection_mode,
+    get_selection_percentile,
+    get_selection_metric,
+)
 from .normalize import normalize_videos
 
 
@@ -23,9 +29,18 @@ def ingest_creator(creator_handle: str, video_limit: int = 30):
 
     RAW_DATA_DIR.mkdir(exist_ok=True)
 
+    scan_limit = get_default_scan_limit()
+    selection_mode = get_selection_mode()
+    selection_percentile = get_selection_percentile()
+    selection_metric = get_selection_metric()
+
     raw_videos = fetch_raw_videos(
         creator_handle=creator_handle,
         video_limit=video_limit,
+        scan_limit=scan_limit if scan_limit else video_limit,
+        selection_mode=selection_mode,
+        selection_percentile=selection_percentile,
+        selection_metric=selection_metric,
     )
 
     normalized = normalize_videos(raw_videos)

@@ -1,0 +1,175 @@
+from pathlib import Path
+import json
+import csv
+
+from profiling.utils.creator_config import get_active_creator
+
+
+RAW_VISUAL_DIR = Path("profiling/metadata/raw_visual")
+RAW_DATA_PATH = Path("profiling/metadata/raw_data/creator_metadata.json")
+OUT_PATH = Path("profiling/metadata/labels/format_labels.csv")
+
+DEFAULT_FORMAT_LABELS = [
+    "talking_head",
+    "voiceover",
+    "text_heavy",
+    "broll",
+    "dance",
+    "duo_or_group",
+    "tutorial_or_demo",
+    "skit_or_comedy",
+    "product_or_ad",
+    "food_or_cooking",
+    "other",
+]
+DEFAULT_PERFORMANCE_LABELS = ["hit", "ok", "miss"]
+
+
+def load_raw_data():
+    if not RAW_DATA_PATH.exists():
+        return {}
+    try:
+        return json.loads(RAW_DATA_PATH.read_text())
+    except Exception:
+        return {}
+
+
+def load_visual_cache(creator_id: str):
+    path = RAW_VISUAL_DIR / f"{creator_id}.json"
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text())
+    except Exception:
+        return {}
+
+
+def _load_existing_labels():
+    if not OUT_PATH.exists():
+        return {}
+    with open(OUT_PATH, "r") as f:
+        reader = csv.DictReader(f)
+        existing = {}
+        for r in reader:
+            key = (r.get("creator_id"), r.get("video_id"))
+            existing[key] = r
+        return existing
+
+
+def _prompt_label(label_type: str, options: list) -> str:
+    print(f"Select {label_type} label:")
+    for i, opt in enumerate(options, start=1):
+        print(f"  {i}. {opt}")
+    print("  s. skip")
+    print("  q. quit")
+
+    while True:
+        val = input("> ").strip().lower()
+        if val in ("s", "skip"):
+            return ""
+        if val in ("q", "quit"):
+            raise KeyboardInterrupt
+        if val.isdigit():
+            idx = int(val) - 1
+            if 0 <= idx < len(options):
+                return options[idx]
+        if val in options:
+            return val
+        print("Invalid selection. Try again.")
+
+
+def _write_rows(rows):
+    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(OUT_PATH, "w", newline="") as f:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=[
+                "creator_id",
+                "video_id",
+                "format_label",
+                "performance_label",
+                "tiktok_url",
+                "views",
+                "likes",
+                "comments",
+                "duration_sec",
+                "posted_at",
+            ],
+        )
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def main():
+    creator_id = get_active_creator()
+    raw_data = load_raw_data()
+    visual_cache = load_visual_cache(creator_id)
+
+    if not visual_cache:
+        raise ValueError(
+            f"No raw_visual cache for {creator_id}. "
+            "Run pipeline to generate it first."
+        )
+
+    existing = _load_existing_labels()
+    rows = []
+    videos = raw_data.get(creator_id, [])
+    video_meta = {v.get("video_id"): v for v in videos}
+
+    for video_id, signals in visual_cache.items():
+        meta = video_meta.get(video_id, {})
+        prev = existing.get((creator_id, video_id), {})
+        rows.append({
+            "creator_id": creator_id,
+            "video_id": video_id,
+            "format_label": prev.get("format_label", ""),
+            "performance_label": prev.get("performance_label", ""),
+            "tiktok_url": f"https://www.tiktok.com/@{creator_id}/video/{video_id}",
+            "views": meta.get("views"),
+            "likes": meta.get("likes"),
+            "comments": meta.get("comments"),
+            "duration_sec": meta.get("duration_sec"),
+            "posted_at": meta.get("posted_at"),
+        })
+
+    _write_rows(rows)
+    print(f"[OK] Wrote {len(rows)} rows to {OUT_PATH}")
+
+    label_mode = input("Open URLs and label now? (y/n): ").strip().lower()
+    if label_mode != "y":
+        return
+
+    for row in rows:
+        if row["format_label"] and row["performance_label"]:
+            continue
+
+        url = row["tiktok_url"]
+        print(f"\nOpen: {url}")
+        try:
+            import subprocess
+            subprocess.run(["open", url], check=False)
+        except Exception:
+            pass
+
+        print(
+            f"views={row.get('views')} likes={row.get('likes')} "
+            f"comments={row.get('comments')} duration={row.get('duration_sec')}"
+        )
+
+        try:
+            if not row["format_label"]:
+                row["format_label"] = _prompt_label(
+                    "format", DEFAULT_FORMAT_LABELS
+                )
+            if not row["performance_label"]:
+                row["performance_label"] = _prompt_label(
+                    "performance", DEFAULT_PERFORMANCE_LABELS
+                )
+        except KeyboardInterrupt:
+            break
+
+        _write_rows(rows)
+
+
+if __name__ == "__main__":
+    main()

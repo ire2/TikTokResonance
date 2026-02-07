@@ -10,6 +10,7 @@ def compute_resonance(
     creator_embedding_payload: Dict,
     creator_profile: Dict,
     top_k: int = 5,
+    idea_motion_intensity: float | None = None,
 ) -> Dict:
     """
     Compute resonance between an idea and a creator.
@@ -72,20 +73,38 @@ def compute_resonance(
     talking_head_affinity = (
         visual.get("avg_talking_head_confidence") or 0.0
     )
+    creator_motion_intensity = visual.get("avg_motion_intensity")
+
+    motion_alignment = None
+    if idea_motion_intensity is not None and creator_motion_intensity is not None:
+        motion_alignment = 1.0 - abs(
+            float(idea_motion_intensity) - float(creator_motion_intensity)
+        )
+        motion_alignment = round(max(0.0, motion_alignment), 3)
 
     # ---- final score ----
-    resonance_score = round(
-        0.55 * semantic_alignment
-        + 0.25 * dialogue_affinity
-        + 0.20 * (1 - solo_rant_affinity),
-        4,
-    )
+    if motion_alignment is None:
+        resonance_score = round(
+            0.55 * semantic_alignment
+            + 0.25 * dialogue_affinity
+            + 0.20 * (1 - solo_rant_affinity),
+            4,
+        )
+    else:
+        resonance_score = round(
+            0.50 * semantic_alignment
+            + 0.20 * dialogue_affinity
+            + 0.15 * (1 - solo_rant_affinity)
+            + 0.15 * motion_alignment,
+            4,
+        )
 
     return {
         "semantic_alignment": semantic_alignment,
         "dialogue_affinity": round(dialogue_affinity, 3),
         "solo_rant_affinity": round(solo_rant_affinity, 3),
         "talking_head_affinity": round(talking_head_affinity, 3),
+        "motion_alignment": motion_alignment,
         "resonance_score": resonance_score,
         "evidence": evidence,
     }

@@ -1,7 +1,10 @@
 import cv2
 import numpy as np
 
+from utils.trace import trace
 
+
+@trace
 def compute_motion_intensity(
     video_path: str,
     sample_rate: int = 5,

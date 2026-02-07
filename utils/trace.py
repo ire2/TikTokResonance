@@ -12,7 +12,6 @@ _TAG_PREFIXES = {
     "profiling.profile_generator": "PROFILE GEN",
     "profiling.nlp": "NLP",
     "profiling.embedding": "EMBEDDING",
-    "profiling.resonance": "RESONANCE"
 }
 
 

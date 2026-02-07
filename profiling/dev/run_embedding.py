@@ -7,12 +7,18 @@ from profiling.embedding.creator_embedding import build_creator_embedding
 from profiling.embedding.embedding_store import save_creator_embedding
 from profiling.nlp.transcript_loader import load_transcript
 from profiling.nlp.dialogue_chunker import chunk_dialogue
+from profiling.utils.creator_config import (
+    get_active_creator,
+    get_default_caption_limit,
+    get_default_model_name,
+)
 
 # ---------------- CONFIG ----------------
-CREATOR_ID = "expoparker"
-MODEL_NAME = "BAAI/bge-large-en-v1.5"
-CAPTION_DIR = Path("profiling/metadata/raw_captions")
-LIMIT = 10
+BASE_DIR = Path(__file__).resolve().parents[2]
+CREATOR_ID = get_active_creator()
+MODEL_NAME = get_default_model_name()
+CAPTION_DIR = BASE_DIR / "profiling" / "metadata" / "raw_captions"
+LIMIT = get_default_caption_limit()
 # ---------------------------------------
 
 

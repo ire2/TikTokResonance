@@ -1,0 +1,8 @@
+active_creator: expoparker
+defaults:
+  model_name: BAAI/bge-large-en-v1.5
+  caption_limit: 10
+  scan_limit: 100
+  selection_mode: both
+  selection_percentile: 0.2
+  selection_metric: views
