@@ -85,9 +85,86 @@ def index():
     total = len(rows)
 
     if not current:
-        return HTMLResponse(
-            f"<h3>All done. Labeled {labeled}/{total}.</h3>"
-        )
+        html = f"""
+        <html>
+        <head>
+          <title>Labeling Complete</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+          <style>
+            :root {{
+              --bg: #0b0e12;
+              --card: #121825;
+              --text: #eaf2ff;
+              --muted: #9fb3c8;
+              --accent: #21f0c9;
+              --border: #243242;
+              --shadow: 0 20px 60px rgba(0,0,0,0.45);
+            }}
+            body {{
+              margin: 0;
+              font-family: "Work Sans", system-ui, sans-serif;
+              color: var(--text);
+              background:
+                radial-gradient(900px 500px at 8% -10%, #1d2a40 0%, transparent 60%),
+                radial-gradient(900px 600px at 100% 0%, #1b2b3a 0%, transparent 55%),
+                linear-gradient(180deg, #0b0e12 0%, #090c10 100%);
+              display: grid;
+              place-items: center;
+              min-height: 100vh;
+              padding: 20px;
+            }}
+            .card {{
+              background: linear-gradient(180deg, var(--card) 0%, #0f1520 100%);
+              border: 1px solid var(--border);
+              border-radius: 18px;
+              box-shadow: var(--shadow);
+              padding: 28px 30px;
+              max-width: 520px;
+              text-align: center;
+            }}
+            .title {{
+              font-family: "Space Grotesk", sans-serif;
+              font-size: 30px;
+              font-weight: 700;
+              margin-bottom: 6px;
+            }}
+            .sub {{
+              color: var(--muted);
+              font-size: 14px;
+              margin-bottom: 18px;
+            }}
+            .stat {{
+              display: inline-flex;
+              align-items: center;
+              gap: 10px;
+              padding: 8px 12px;
+              border-radius: 999px;
+              border: 1px solid var(--border);
+              background: #0f1522;
+              color: var(--muted);
+              font-size: 13px;
+            }}
+            .accent {{
+              color: var(--accent);
+              font-weight: 700;
+            }}
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="title">All Done</div>
+            <div class="sub">Every video in the queue has been labeled.</div>
+            <div class="stat">
+              Labeled <span class="accent">{labeled}</span> / {total}
+            </div>
+          </div>
+        </body>
+        </html>
+        """
+        return HTMLResponse(html)
 
     url = current.get("tiktok_url", "")
 
@@ -101,6 +178,22 @@ def index():
             + "".join(opts)
             + "</select>"
         )
+
+    def fmt_num(v):
+        if v is None or v == "":
+            return "-"
+        try:
+            return f"{int(v):,}"
+        except Exception:
+            return str(v)
+
+    def fmt_date(v):
+        if not v:
+            return "-"
+        s = str(v)
+        if len(s) == 8 and s.isdigit():
+            return f"{s[:4]}-{s[4:6]}-{s[6:]}"
+        return s
 
     html = f"""
     <html>
@@ -299,11 +392,11 @@ def index():
             <div class="form">
               <div class="section-title">Video Metrics</div>
               <div class="meta">
-                <div>views: {current.get("views")}</div>
-                <div>likes: {current.get("likes")}</div>
-                <div>comments: {current.get("comments")}</div>
-                <div>duration: {current.get("duration_sec")}s</div>
-                <div>posted: {current.get("posted_at")}</div>
+                <div>views: {fmt_num(current.get("views"))}</div>
+                <div>likes: {fmt_num(current.get("likes"))}</div>
+                <div>comments: {fmt_num(current.get("comments"))}</div>
+                <div>duration: {fmt_num(current.get("duration_sec"))}s</div>
+                <div>posted: {fmt_date(current.get("posted_at"))}</div>
                 <div>video_id: {current.get("video_id")}</div>
               </div>
               <div class="section-title">Labels</div>
