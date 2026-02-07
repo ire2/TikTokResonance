@@ -8,7 +8,6 @@ CASCADE_PATH = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
 FACE_CASCADE = cv2.CascadeClassifier(CASCADE_PATH)
 
 
-@trace
 def detect_faces(frame) -> List[Dict]:
     """
     Detect faces in a single frame.

@@ -134,41 +134,10 @@ def main():
 
     _write_rows(rows)
     print(f"[OK] Wrote {len(rows)} rows to {OUT_PATH}")
-
-    label_mode = input("Open URLs and label now? (y/n): ").strip().lower()
-    if label_mode != "y":
-        return
-
-    for row in rows:
-        if row["format_label"] and row["performance_label"]:
-            continue
-
-        url = row["tiktok_url"]
-        print(f"\nOpen: {url}")
-        try:
-            import subprocess
-            subprocess.run(["open", url], check=False)
-        except Exception:
-            pass
-
-        print(
-            f"views={row.get('views')} likes={row.get('likes')} "
-            f"comments={row.get('comments')} duration={row.get('duration_sec')}"
-        )
-
-        try:
-            if not row["format_label"]:
-                row["format_label"] = _prompt_label(
-                    "format", DEFAULT_FORMAT_LABELS
-                )
-            if not row["performance_label"]:
-                row["performance_label"] = _prompt_label(
-                    "performance", DEFAULT_PERFORMANCE_LABELS
-                )
-        except KeyboardInterrupt:
-            break
-
-        _write_rows(rows)
+    print(
+        "[LABELS] Open the labeling UI with:\n"
+        "  uvicorn profiling.label_ui.app:app --reload"
+    )
 
 
 if __name__ == "__main__":

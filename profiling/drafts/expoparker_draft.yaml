@@ -4,34 +4,32 @@ status: draft
 analysis_window: last_30_videos
 observed_patterns:
   dominant_formats:
-  - text_heavy
-  underused_formats:
-  - voiceover
-  - talking_head
-  avg_duration_sec: 24.3
+  - skit_or_comedy
+  underused_formats: []
+  avg_duration_sec: 24.4
 modality_bias:
   voice: high
   text: high
 visual_signals:
-  avg_face_presence_ratio: 0.75
-  avg_talking_head_confidence: 0.775
+  avg_face_presence_ratio: 0.771
+  avg_talking_head_confidence: 0.797
   avg_motion_intensity: 0.06
-  avg_face_area_stability: 0.216
+  avg_face_area_stability: 0.252
   avg_face_area_ratio: 0.027
-  avg_face_area_ratio_std: 0.022
-  avg_brightness_mean: 0.432
-  avg_brightness_std: 0.022
+  avg_face_area_ratio_std: 0.021
+  avg_brightness_mean: 0.429
+  avg_brightness_std: 0.023
   avg_saturation_mean: 0.288
-  avg_color_temperature_index: -0.055
+  avg_color_temperature_index: -0.06
   avg_edge_density: 0.062
-  avg_text_density_heuristic: 0.666
+  avg_text_density_heuristic: 0.678
   avg_text_density_ocr: 0.007
   avg_shot_change_rate: 0.0
-  avg_camera_motion_intensity: 0.211
-  avg_camera_stability: 0.789
+  avg_camera_motion_intensity: 0.204
+  avg_camera_stability: 0.796
   avg_object_presence_ratio: 0.996
-  avg_objects_per_frame: 1.858
-  avg_audio_energy: 0.123
+  avg_objects_per_frame: 1.854
+  avg_audio_energy: 0.13
   avg_music_confidence: 0.197
 nlp_captioning_gate:
   weight: 1.0
@@ -39,7 +37,56 @@ nlp_captioning_gate:
   reason: consistent talking-head presence
 profile_nlp:
   dialogue_video_ratio: 1.0
-  solo_rant_ratio: 0.517
-  avg_speakers: 1.59
+  solo_rant_ratio: 0.483
+  avg_speakers: 1.62
+  topic_profile:
+    topics:
+    - cluster: 1
+      size: 8
+      top_terms:
+      - don
+      - okay
+      - didn
+      - like
+      - mean
+      - gonna
+    - cluster: 2
+      size: 7
+      top_terms:
+      - oh
+      - yeah
+      - actually
+      - good
+      - fuck
+      - huh
+    - cluster: 0
+      size: 6
+      top_terms:
+      - just
+      - fuck
+      - nice
+      - look
+      - let
+      - sorry
+    - cluster: 4
+      size: 4
+      top_terms:
+      - thanks
+      - really
+      - right
+      - weird
+      - good
+      - ll
+    - cluster: 3
+      size: 3
+      top_terms:
+      - ve
+      - good
+      - oh
+      - just
+      - cute
+      - cat
+    num_topics: 5
+    num_docs: 28
 creator_embedding: null
 human_review_required: true

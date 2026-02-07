@@ -182,7 +182,6 @@ def download_selected_videos(
     subprocess.run(cmd, check=True)
 
 
-@trace
 def _metric_value(v: Dict, metric: str) -> int:
     if metric == "likes":
         return int(v.get("like_count") or 0)

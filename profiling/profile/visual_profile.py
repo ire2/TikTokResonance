@@ -25,12 +25,18 @@ def compute_visual_profile(creator_id: str, videos: list) -> dict:
     signals = []
 
     fast_visual = os.getenv("FAST_VISUAL", "false").lower() == "true"
+    if fast_visual:
+        print("[VISUAL] FAST_VISUAL=true (OCR/objects/audio disabled)")
+    else:
+        print("[VISUAL] FAST_VISUAL=false (OCR/objects/audio enabled)")
 
-    for v in videos:
+    total = len(videos)
+    for idx, v in enumerate(videos, start=1):
         video_id = v.get("video_id")
         if not video_id:
             continue
 
+        print(f"[VISUAL] {idx}/{total} video_id={video_id}")
         path = video_path(creator_id, video_id)
         if not path.exists():
             continue

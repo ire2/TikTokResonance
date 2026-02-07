@@ -18,6 +18,8 @@ CREATOR_ID = get_active_creator()
 MODEL_NAME = get_default_model_name()
 PROFILE_PATH = BASE_DIR / "profiling" / "drafts" / f"{CREATOR_ID}_draft.yaml"
 IDEA_MOTION_INTENSITY = 0.2
+IDEA_TEXT_DENSITY = 0.08
+IDEA_FORMAT = "talking_head"
 
 IDEA_TEXT = """
 Mukbang sushi. Mukbang is a genre of social media content where creators eat large quantities of food while interacting with their audience. Sushi is a popular type of Japanese cuisine that typically consists of vinegared rice, seafood, and vegetables. A "mukbang sushi" video would likely feature a creator eating various types of sushi while engaging with their viewers.
@@ -51,6 +53,8 @@ def main():
         creator_embedding_payload=creator_embedding_payload,
         creator_profile=creator_profile,
         idea_motion_intensity=IDEA_MOTION_INTENSITY,
+        idea_text_density=IDEA_TEXT_DENSITY,
+        idea_format=IDEA_FORMAT,
     )
 
     report = build_resonance_report(

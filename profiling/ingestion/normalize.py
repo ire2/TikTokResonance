@@ -45,8 +45,12 @@ def normalize_videos(raw_videos):
     """
 
     normalized = []
+    total = len(raw_videos)
 
-    for v in raw_videos:
+    for idx, v in enumerate(raw_videos, start=1):
+        vid = v.get("id")
+        if vid:
+            print(f"[NORMALIZE] {idx}/{total} video_id={vid}")
         normalized.append({
             "video_id": v.get("id"),
             "local_path": v.get("local_path"),

@@ -20,12 +20,21 @@ def get_active_creator(path: Path = CONFIG_PATH) -> str:
     return creator_id
 
 
+def get_test_creator(path: Path = CONFIG_PATH) -> list[str]:
+    config = load_config(path)
+    test_creators = config.get("test_creator")
+    if not test_creators:
+        raise ValueError("test_creators missing in profiling/config.yaml")
+    return test_creators
+
+
 def get_default_model_name(path: Path = CONFIG_PATH) -> str:
     config = load_config(path)
     defaults = config.get("defaults", {})
     model_name = defaults.get("model_name")
     if not model_name:
-        raise ValueError("defaults.model_name missing in profiling/config.yaml")
+        raise ValueError(
+            "defaults.model_name missing in profiling/config.yaml")
     return model_name
 
 
@@ -34,7 +43,8 @@ def get_default_caption_limit(path: Path = CONFIG_PATH) -> int:
     defaults = config.get("defaults", {})
     limit = defaults.get("caption_limit")
     if limit is None:
-        raise ValueError("defaults.caption_limit missing in profiling/config.yaml")
+        raise ValueError(
+            "defaults.caption_limit missing in profiling/config.yaml")
     return int(limit)
 
 

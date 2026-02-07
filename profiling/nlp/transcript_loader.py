@@ -8,11 +8,9 @@ import re
 from utils.trace import trace
 
 
-@trace
 def normalize_text(text: str) -> str:
     """
     Light normalization only.
-    DO NOT add NLP logic here.
     """
     text = text.replace("\n", " ")
     text = re.sub(r"\s+", " ", text)

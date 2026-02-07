@@ -11,6 +11,8 @@ def compute_resonance(
     creator_profile: Dict,
     top_k: int = 5,
     idea_motion_intensity: float | None = None,
+    idea_text_density: float | None = None,
+    idea_format: str | None = None,
 ) -> Dict:
     """
     Compute resonance between an idea and a creator.
@@ -74,6 +76,27 @@ def compute_resonance(
         visual.get("avg_talking_head_confidence") or 0.0
     )
     creator_motion_intensity = visual.get("avg_motion_intensity")
+    creator_text_density = (
+        visual.get("avg_text_density_ocr")
+        or visual.get("avg_text_density_heuristic")
+    )
+
+    format_alignment = None
+    dominant_formats = (
+        creator_profile.get("observed_patterns", {}).get("dominant_formats")
+        or []
+    )
+    underused_formats = (
+        creator_profile.get("observed_patterns", {}).get("underused_formats")
+        or []
+    )
+    if idea_format:
+        if idea_format in dominant_formats:
+            format_alignment = 1.0
+        elif idea_format in underused_formats:
+            format_alignment = 0.3
+        else:
+            format_alignment = 0.6
 
     motion_alignment = None
     if idea_motion_intensity is not None and creator_motion_intensity is not None:
@@ -82,8 +105,24 @@ def compute_resonance(
         )
         motion_alignment = round(max(0.0, motion_alignment), 3)
 
+    text_density_alignment = None
+    if idea_text_density is not None and creator_text_density is not None:
+        text_density_alignment = 1.0 - abs(
+            float(idea_text_density) - float(creator_text_density)
+        )
+        text_density_alignment = round(
+            max(0.0, text_density_alignment), 3
+        )
+
+    # ---- semantic gate (embedding similarity) ----
+    semantic_gate = None
+    creator_vec = creator_embedding_payload.get("embedding")
+    if creator_vec is not None:
+        sim = float(cos_sim(idea_embedding, creator_vec)[0][0])
+        semantic_gate = round(max(0.0, min(1.0, sim)), 3)
+
     # ---- final score ----
-    if motion_alignment is None:
+    if motion_alignment is None and text_density_alignment is None and format_alignment is None:
         resonance_score = round(
             0.55 * semantic_alignment
             + 0.25 * dialogue_affinity
@@ -91,13 +130,22 @@ def compute_resonance(
             4,
         )
     else:
+        fmt = format_alignment if format_alignment is not None else 0.5
+        mot = motion_alignment if motion_alignment is not None else 0.5
+        txt = text_density_alignment if text_density_alignment is not None else 0.5
         resonance_score = round(
-            0.50 * semantic_alignment
-            + 0.20 * dialogue_affinity
-            + 0.15 * (1 - solo_rant_affinity)
-            + 0.15 * motion_alignment,
+            0.45 * semantic_alignment
+            + 0.18 * dialogue_affinity
+            + 0.12 * (1 - solo_rant_affinity)
+            + 0.10 * fmt
+            + 0.08 * txt
+            + 0.07 * mot,
             4,
         )
+
+    if semantic_gate is not None:
+        gate = max(0.5, semantic_gate)
+        resonance_score = round(resonance_score * gate, 4)
 
     return {
         "semantic_alignment": semantic_alignment,
@@ -105,6 +153,9 @@ def compute_resonance(
         "solo_rant_affinity": round(solo_rant_affinity, 3),
         "talking_head_affinity": round(talking_head_affinity, 3),
         "motion_alignment": motion_alignment,
+        "text_density_alignment": text_density_alignment,
+        "format_alignment": format_alignment,
+        "semantic_gate": semantic_gate,
         "resonance_score": resonance_score,
         "evidence": evidence,
     }

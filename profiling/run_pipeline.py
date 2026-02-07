@@ -6,6 +6,7 @@ import os
 from profiling.ingestion.ingest_creator import ingest_creator
 from .profile_generator import generate_profile, write_profile
 from profiling.dev.generate_label_queue import main as generate_label_queue
+from profiling.utils.creator_config import get_active_creator
 
 
 # ------------------------
@@ -83,20 +84,11 @@ def run_profiling_from_yaml():
     if CLEAN_RUN:
         clear_pycache(BASE_DIR)
 
-    with open(INPUT_PATH, "r") as f:
-        config = yaml.safe_load(f)
-
-    if not config or "creators" not in config:
-        raise ValueError("Invalid creators.yaml format")
-
-    for creator in config["creators"]:
-        creator_id = creator["id"]
-        video_limit = creator.get("video_limit", 30)
-
-        run_profiling_for_creator(
-            creator_id=creator_id,
-            video_limit=video_limit
-        )
+    creator_id = get_active_creator()
+    run_profiling_for_creator(
+        creator_id=creator_id,
+        video_limit=30,
+    )
 
     print("\nProfiling complete. All drafts ready.")
 
