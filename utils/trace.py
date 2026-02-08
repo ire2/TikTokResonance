@@ -1,5 +1,6 @@
 from functools import wraps
 from contextvars import ContextVar
+import os
 
 
 _trace_depth: ContextVar[int] = ContextVar("_trace_depth", default=0)
@@ -28,6 +29,19 @@ def trace(fn=None, *, tag: str | None = None):
 
     @wraps(fn)
     def wrapper(*args, **kwargs):
+        if os.getenv("TRACE_ENABLED", "false").lower() != "true":
+            return fn(*args, **kwargs)
+
+        trace_cv = os.getenv("TRACE_CV", "false").lower() == "true"
+        trace_nlp = os.getenv("TRACE_NLP", "false").lower() == "true"
+        trace_embed = os.getenv("TRACE_EMBEDDING", "false").lower() == "true"
+        if fn.__module__.startswith("profiling.cv") and not trace_cv:
+            return fn(*args, **kwargs)
+        if fn.__module__.startswith("profiling.nlp") and not trace_nlp:
+            return fn(*args, **kwargs)
+        if fn.__module__.startswith("profiling.embedding") and not trace_embed:
+            return fn(*args, **kwargs)
+
         depth = _trace_depth.get()
         indent = "  " * depth
         resolved_tag = tag or _module_tag(fn.__module__)

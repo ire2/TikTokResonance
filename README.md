@@ -1,185 +1,130 @@
-# ConstraintSpace
+# Resonance Lab
 
-ConstraintSpace is a **human-governed decision engine** for creative AI systems.
-It evaluates, scores, and selects creative ideas under explicit, creator-specific constraints.
-
-The system is designed so that **machine learning augments decision-making**, rather than silently replacing human judgment.
+This repository is a **creator resonance lab** for evaluating whether an idea or draft video will fit (and potentially perform for) a specific creator.  
+It combines **CV signals**, **NLP signals**, and **semantic embeddings** into a single scoring pipeline.
 
 ---
 
-## What Problem This Solves
+## What It Does
 
-Most creative AI systems optimize generation first.
-
-ConstraintSpace answers a different question:
-
-> *Given a creator’s identity and constraints, which ideas should be pursued, experimented with, or rejected — and why?*
-
----
-
-## Core Principles
-
-- Human review is explicit and blocking
-- Constraints are first-class artifacts
-- Decisions are explainable
-- Governance precedes automation
-- ML is a replaceable scoring component
+- Ingests creator metadata and videos
+- Builds creator profiles (CV + NLP + metadata)
+- Trains a format classifier from labeled videos
+- Runs resonance on a **test video** or **idea text**
 
 ---
 
-## High-Level Architecture
+## Quick Start
 
-```
-Profiling → ConstraintSpace → Selection Plan
-```
+### 1) Configure creators
+Edit root `config.yaml`:
 
----
-
-## Profiling
-
-**Purpose**
-
-- Build a behavioral profile of a creator from real data
-
-**Properties**
-
-- Batch
-- Deterministic
-- No human interaction
-
-**Planned Signals (v1+)**
-- Computer vision–based format detection
-- OCR density (text-heavy vs visual)
-- Face presence / shot structure
-- Audio energy and speech patterns
-
-
-**Output**
-
-```
-profiling/reviewed/{creator}_profile.yaml
+```yaml
+active_creator: expoparker
+training_creators:
+  - expoparker
+  - cleoabram
+test_creator: cleoabram
+defaults:
+  model_name: BAAI/bge-large-en-v1.5
+  caption_limit: 30
+  scan_limit: 100
+  selection_mode: both
+  selection_percentile: 0.2
+  selection_metric: views
 ```
 
-ConstraintSpace does not proceed without approval.
-
----
-
-## Human Review (First-Class Control)
-
-**Purpose**
-- Preserve human authority over creator identity
-- Prevent silent model drift
-- Validate inferred patterns before automation
-
-**Properties**
-- Blocking
-- Explicit approval or rejection
-- Manual edits outside code
-- Required for all downstream decisions
-
-**Output**
-```
-profiling/reviewed/{creator}_profile.yaml
-```
-
-## ConstraintSpace
-
-**Responsibilities**
-
-- Compile creator constraints
-- Evaluate candidate ideas
-- Score and rank ideas
-- Apply experiment policy
-- Produce an actionable plan
-
-**Entry Point**
-
+### 2) Run the pipeline (profiles + embeddings)
 ```bash
-python -m engine.run_constraint_space
+python -m pipeline.run_main
 ```
 
-## Idea Evaluation 
-
-Ideas are evaluated as **proposals**, not generated content.
-
-Example idea schema:
-
-```yaml 
-idea_id: idea_001
-title: "Explaining X in under 30 seconds"
-format_hypothesis:
-  duration_sec: 25
-  has_voice: true
-  has_text: true
-  format: talking_head
+### 3) Label videos (optional, for training)
+```bash
+make labels
+make ui
 ```
 
-## Evaluation Output 
-
-Each idea produces:
-
-```yaml 
-decision: pass | warn | reject
-score: 0.0 – 1.0
-confidence_band: low | medium | high
-reasons: [...]
-signals: {...}
+### 4) Train format classifier
+```bash
+make train
 ```
 
-## Selection Plan (v0) 
-
-ConstraintSpace outputs a concrete plan:
-
-```text 
-APPROVED:
-- Explaining X in under 30 seconds (0.80)
-
-EXPERIMENTS:
-- Explaining X in 10 minutes (0.76)
-
-REJECTED:
+### 5) Run resonance on a test video
+Put a test video in:
 ```
-This completes the decision loop.
-
-## Project Structure
-
-```text
-ConstraintSpace/
-├── engine/
-│   ├── run_constraint_space.py
-│   └── human_review.py
-├── profiling/
-│   ├── run_pipeline.py
-│   ├── drafts/
-│   ├── reviewed/
-│   └── ingestion/
-├── constraint_space/
-│   ├── build_constraints.py
-│   ├── evaluate_idea.py
-│   ├── select_ideas.py
-│   └── ideas/
+profiling/test/video
 ```
+Then:
+```bash
+make resonance
+```
+
+---
+
+## Makefile Shortcuts
+
+```
+make run           # full pipeline
+make run-skip      # skip profiling + embeddings
+make labels        # generate label queue
+make ui            # launch label UI
+make train         # train format classifier
+make resonance     # run resonance on test video
+make random        # pick random test video
+```
+
+---
+
+## Data Layout
+
+All runtime artifacts live in `data/`:
+
+```
+data/
+  raw_videos/
+  raw_captions/
+  raw_visual/
+  raw_data/
+  embeddings_store/
+  labels/
+  drafts/
+```
+
+---
+
+## Resonance Scoring
+
+Resonance combines:
+- **Semantic alignment** (idea ↔ creator embeddings)
+- **Format alignment** (idea format ↔ creator dominant formats)
+- **CV alignment** (motion, text density, etc.)
+- **Semantic gate** (embedding similarity)
+
+Output example:
+```
+semantic_alignment
+format_alignment
+motion_alignment
+text_density_alignment
+resonance_score
+```
+
+---
+
+## Notes
+
+- OCR/YOLO/audio are expensive. Use `FAST_VISUAL=true` for iteration.
+- If you want full quality CV signals, run once with:
+  ```
+  FAST_VISUAL=false FORCE_PROFILES=true
+  ```
+
+---
+
 ## Status
-- v0 complete 
-- Deterministic 
-- Explainable 
-- ML- Ready 
 
-## Roadmap
-
-### v1 - ML- Assisted Scoring 
--	Replace heuristic scoring with learned models
--	Add CV-based format classification in profiling
--	Train on (creator, idea, outcome) data
--	Preserve human review and decision policies
-
-### v2 - Adaptive Constraints 
-- Update constraints from performance feedback
--	Dynamically budget experimentation
--	Calibrate risk tolerance per creator
-
-## Summary 
-ConstraintSpace is a decision system, not a generator.
-It formalizes creative judgment before automation.
-
+- Working end‑to‑end pipeline
+- Multi‑creator ingestion
+- Video‑based resonance testing
 ---

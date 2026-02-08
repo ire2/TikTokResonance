@@ -52,6 +52,7 @@ def normalize_videos(raw_videos, creator_id: str | None = None):
         if vid:
             prefix = f"[NORMALIZE][{creator_id}]" if creator_id else "[NORMALIZE]"
             print(f"{prefix} {idx}/{total} video_id={vid}")
+        format_pred = classifier.classify(v)
         normalized.append({
             "video_id": v.get("id"),
             "local_path": v.get("local_path"),
@@ -61,7 +62,8 @@ def normalize_videos(raw_videos, creator_id: str | None = None):
             "comments": v.get("comment_count"),
             "has_voice": v.get("acodec") not in (None, "none"),
             "has_text": bool(v.get("description")),
-            "format": classifier.classify(v),
+            "format": None,
+            "format_pred": format_pred,
             'description': v.get("description"),
             "posted_at": v.get("upload_date"),
         })

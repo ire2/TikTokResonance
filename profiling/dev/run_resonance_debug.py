@@ -2,9 +2,9 @@ from pathlib import Path
 import yaml
 
 from profiling.embedding.embedder import TextEmbedder
-from profiling.resonance.idea_encoder import encode_idea
-from profiling.resonance.resonance_score import compute_resonance
-from profiling.resonance.resonance_report import build_resonance_report
+from resonance.idea_encoder import encode_idea
+from resonance.resonance_score import compute_resonance
+from resonance.resonance_report import build_resonance_report
 from profiling.embedding.embedding_store import load_creator_embeddings
 from profiling.utils.creator_config import (
     get_active_creator,

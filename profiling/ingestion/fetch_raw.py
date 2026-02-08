@@ -21,6 +21,7 @@ def fetch_metadata(
     """
 
     url = f"https://www.tiktok.com/@{creator_handle}"
+    print(f"[INGEST][{creator_handle}] Scanning metadata (limit={video_limit})")
 
     cmd = [
         "yt-dlp",
@@ -39,9 +40,13 @@ def fetch_metadata(
 
     videos = []
 
+    count = 0
     for line in process.stdout:
         try:
             videos.append(json.loads(line))
+            count += 1
+            if count % 10 == 0:
+                print(f"[INGEST][{creator_handle}] metadata scanned: {count}")
         except json.JSONDecodeError:
             continue
 

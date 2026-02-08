@@ -1,5 +1,6 @@
 from statistics import mean
 from utils.trace import trace
+import os
 from profiling.utils.video_paths import video_path
 from profiling.nlp.asr import ensure_captions
 from profiling.nlp.transcript_loader import load_transcript
@@ -11,6 +12,9 @@ from profiling.nlp.topic_profile import compute_topic_profile
 def compute_nlp_profile(creator_id: str, videos: list) -> dict:
     outputs = []
     docs = []
+    debug_video = os.getenv("DEBUG_VIDEO", "false").lower() == "true"
+    total = len(videos)
+    processed = 0
 
     for v in videos:
         video_id = v.get("video_id")
@@ -40,6 +44,11 @@ def compute_nlp_profile(creator_id: str, videos: list) -> dict:
 
         if signals:
             outputs.append(signals)
+            if debug_video:
+                print(f"[VIDEO][{creator_id}:{video_id}] nlp_signals=ok")
+        processed += 1
+        if processed % 5 == 0:
+            print(f"[NLP][{creator_id}] processed {processed}/{total}")
 
     if not outputs:
         return {}

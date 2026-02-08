@@ -1,6 +1,7 @@
 from utils.trace import trace
 import json
 from pathlib import Path
+import os
 
 from .fetch_raw import fetch_raw_videos
 from profiling.utils.creator_config import (
@@ -35,6 +36,14 @@ def ingest_creator(creator_handle: str, video_limit: int = 30):
     selection_percentile = get_selection_percentile()
     selection_metric = get_selection_metric()
 
+    # Load existing metadata
+    if RAW_DATA_PATH.exists():
+        existing = json.loads(RAW_DATA_PATH.read_text())
+    elif LEGACY_RAW_DATA_PATH.exists():
+        existing = json.loads(LEGACY_RAW_DATA_PATH.read_text())
+    else:
+        existing = {}
+
     raw_videos = fetch_raw_videos(
         creator_handle=creator_handle,
         video_limit=video_limit,
@@ -44,17 +53,25 @@ def ingest_creator(creator_handle: str, video_limit: int = 30):
         selection_metric=selection_metric,
     )
 
-    normalized = normalize_videos(raw_videos, creator_id=creator_handle)
+    existing_list = existing.get(creator_handle, [])
+    existing_ids = {v.get("video_id") for v in existing_list if v.get("video_id")}
+    new_raw = [v for v in raw_videos if v.get("id") not in existing_ids]
 
-    # Load existing metadata
-    if RAW_DATA_PATH.exists():
-        existing = json.loads(RAW_DATA_PATH.read_text())
-    elif LEGACY_RAW_DATA_PATH.exists():
-        existing = json.loads(LEGACY_RAW_DATA_PATH.read_text())
-    else:
-        existing = {}
+    if not new_raw:
+        print(f"[INGEST][{creator_handle}] No new videos found. Skipping normalization.")
+        return existing_list
 
-    existing[creator_handle] = normalized
+    normalized = normalize_videos(new_raw, creator_id=creator_handle)
+
+    merged = list(existing_list)
+    merged_ids = {v.get("video_id") for v in merged if v.get("video_id")}
+    for v in normalized:
+        vid = v.get("video_id")
+        if vid and vid not in merged_ids:
+            merged.append(v)
+            merged_ids.add(vid)
+
+    existing[creator_handle] = merged
 
     RAW_DATA_PATH.write_text(json.dumps(existing, indent=2))
 

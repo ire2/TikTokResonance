@@ -5,7 +5,7 @@ from profiling.ingestion.fetch_raw import fetch_metadata, download_selected_vide
 from profiling.utils.creator_config import get_active_creator, get_test_creator
 
 
-OUTPUT_DIR = Path("profiling/test/video")
+OUTPUT_DIR = Path("data/test/video")
 
 
 def main():

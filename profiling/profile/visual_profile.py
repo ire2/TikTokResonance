@@ -19,6 +19,7 @@ def _extract_visual_for_video(args):
             use_ocr=not fast_visual,
             use_objects=not fast_visual,
             use_audio=not fast_visual,
+            debug_label=f"{creator_id}:{video_id}",
         )
         return (video_id, sig)
     except Exception:
@@ -66,10 +67,15 @@ def compute_visual_profile(creator_id: str, videos: list) -> dict:
         ctx = mp.get_context("spawn")
         with ctx.Pool(processes=workers) as pool:
             args = [(creator_id, vid, fast_visual) for vid in work]
+            done = 0
+            total = len(work)
             for vid, sig in pool.imap_unordered(_extract_visual_for_video, args):
                 if sig:
                     cache[vid] = sig
                     signals.append(sig)
+                done += 1
+                if done % 5 == 0 or done == total:
+                    print(f"[VISUAL][{creator_id}] processed {done}/{total}")
     else:
         total = len(work)
         for idx, video_id in enumerate(work, start=1):

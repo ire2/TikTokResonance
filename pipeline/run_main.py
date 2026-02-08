@@ -32,12 +32,19 @@ def build_embeddings_for_creator(creator_id: str):
         return
 
     segments = []
-    for cap_path in caption_files:
+    debug_video = os.getenv("DEBUG_VIDEO", "false").lower() == "true"
+    total = len(caption_files)
+    for idx, cap_path in enumerate(caption_files, start=1):
         transcript = load_transcript(cap_path)
         result = chunk_dialogue(transcript)
         for d in result.get("dialogue", []):
             d["video_id"] = cap_path.stem.replace(f"{creator_id}_", "")
             segments.append(d)
+        if debug_video:
+            vid = cap_path.stem.replace(f"{creator_id}_", "")
+            print(f"[VIDEO][{creator_id}:{vid}] embed_segments={len(result.get('dialogue', []))}")
+        if idx % 5 == 0:
+            print(f"[EMBED][{creator_id}] captions processed {idx}/{total}")
 
     if not segments:
         print(f"[EMBED] No dialogue segments for {creator_id}. Skipping.")

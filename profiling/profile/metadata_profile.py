@@ -7,7 +7,12 @@ from utils.trace import trace
 def compute_metadata_profile(videos: list) -> dict:
     total = len(videos)
 
-    format_counts = Counter(v["format"] for v in videos)
+    formats = []
+    for v in videos:
+        fmt = v.get("format") or v.get("format_pred")
+        if fmt:
+            formats.append(fmt)
+    format_counts = Counter(formats)
     dominant_formats = [f for f, c in format_counts.items() if c / total > 0.6]
     underused_formats = [
         f for f, c in format_counts.items() if c / total < 0.2]

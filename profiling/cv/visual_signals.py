@@ -1,6 +1,7 @@
 from typing import Dict
 import numpy as np
 import cv2
+import os
 
 from profiling.cv.frame_sampler import sample_frames
 from profiling.cv.face_detector import detect_faces
@@ -22,6 +23,7 @@ def extract_visual_signals(
     use_ocr: bool = True,
     use_objects: bool = True,
     use_audio: bool = True,
+    debug_label: str | None = None,
 ) -> Dict[str, float]:
     """
     Extract robust visual signals from a video.
@@ -31,6 +33,13 @@ def extract_visual_signals(
 
     Returns interpretable, downstream-safe signals.
     """
+
+    debug_video = (
+        os.getenv("DEBUG_VIDEO", "false").lower() == "true"
+        and debug_label
+    )
+    if debug_video:
+        print(f"[VIDEO][{debug_label}] start_cv")
 
     frames = sample_frames(video_path, num_frames=num_frames)
 
@@ -157,11 +166,15 @@ def extract_visual_signals(
     # -----------------------------
     # Video-level signals
     # -----------------------------
+    if debug_video:
+        print(f"[VIDEO][{debug_label}] motion/shot")
     shot_change_rate = compute_shot_change_rate(video_path)
     camera_motion_intensity = compute_camera_motion_intensity(video_path)
     camera_stability = round(1.0 - camera_motion_intensity, 3)
 
     # OCR-based text density
+    if debug_video and use_ocr:
+        print(f"[VIDEO][{debug_label}] ocr")
     if use_ocr:
         try:
             text_density_ocr = estimate_text_density(frames)
@@ -171,6 +184,8 @@ def extract_visual_signals(
         text_density_ocr = 0.0
 
     # Object detection
+    if debug_video and use_objects:
+        print(f"[VIDEO][{debug_label}] objects")
     if use_objects:
         try:
             object_stats = detect_objects(frames)
@@ -188,10 +203,15 @@ def extract_visual_signals(
         }
 
     # Audio metrics
+    if debug_video and use_audio:
+        print(f"[VIDEO][{debug_label}] audio")
     audio_stats = compute_audio_metrics(video_path) if use_audio else {
         "audio_energy": 0.0,
         "music_confidence": 0.0,
     }
+
+    if debug_video:
+        print(f"[VIDEO][{debug_label}] done_cv")
 
     return {
         "face_presence_ratio": float(round(face_presence_ratio, 3)),
