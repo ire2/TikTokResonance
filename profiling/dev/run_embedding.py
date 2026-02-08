@@ -17,7 +17,7 @@ from profiling.utils.creator_config import (
 BASE_DIR = Path(__file__).resolve().parents[2]
 CREATOR_ID = get_active_creator()
 MODEL_NAME = get_default_model_name()
-CAPTION_DIR = BASE_DIR / "profiling" / "metadata" / "raw_captions"
+CAPTION_DIR = Path("data/raw_captions")
 LIMIT = get_default_caption_limit()
 # ---------------------------------------
 

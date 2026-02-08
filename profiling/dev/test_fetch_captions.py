@@ -8,7 +8,7 @@ def test_fetch_captions_smoke():
 
     fetch_captions(creator, limit)
 
-    raw_dir = Path("profiling/raw_videos")
+    raw_dir = Path("data/raw_videos")
     assert raw_dir.exists()
 
     print("fetch_captions completed without error")

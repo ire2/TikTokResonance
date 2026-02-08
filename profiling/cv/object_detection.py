@@ -3,6 +3,7 @@ from functools import lru_cache
 from typing import List
 
 import numpy as np
+from profiling.utils.device import get_preferred_device
 
 
 @lru_cache(maxsize=1)
@@ -30,7 +31,8 @@ def detect_objects(frames: List[np.ndarray], conf: float = 0.25) -> dict:
     total_objects = 0
     class_counts = {}
 
-    results = model.predict(frames, conf=conf, verbose=False)
+    device = get_preferred_device()
+    results = model.predict(frames, conf=conf, verbose=False, device=device)
     for r in results:
         if r.boxes is None:
             continue

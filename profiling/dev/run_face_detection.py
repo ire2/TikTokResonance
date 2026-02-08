@@ -5,7 +5,7 @@ from profiling.cv.frame_sampler import sample_frames
 from profiling.cv.face_detector import detect_faces
 
 
-RAW_VIDEO_DIR = Path("profiling//metadata/raw_videos")
+RAW_VIDEO_DIR = Path("data/raw_videos")
 DEBUG_DIR = Path("profiling/dev/debug_faces")
 DEBUG_DIR.mkdir(exist_ok=True)
 
@@ -13,7 +13,7 @@ DEBUG_DIR.mkdir(exist_ok=True)
 def main():
     videos = list(RAW_VIDEO_DIR.glob("*.mp4"))
     if not videos:
-        raise RuntimeError("No videos found in profiling/raw_videos")
+        raise RuntimeError("No videos found in data/raw_videos")
 
     video_path = videos[0]
     print(f"[CV TEST] Using video: {video_path.name}")

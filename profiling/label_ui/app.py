@@ -6,7 +6,7 @@ from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 
-BASE_DIR = Path("profiling/metadata/labels")
+BASE_DIR = Path("data/labels")
 CSV_PATH = BASE_DIR / "format_labels.csv"
 
 FORMAT_LABELS = [
@@ -17,6 +17,7 @@ FORMAT_LABELS = [
     "dance",
     "duo_or_group",
     "tutorial_or_demo",
+    "educational",
     "skit_or_comedy",
     "product_or_ad",
     "food_or_cooking",

@@ -2,19 +2,12 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug Format Classification (module)",
+      "name": "Run Resonance From Video",
       "type": "python",
       "request": "launch",
-      "module": "profiling.dev.run_format_classification",
-      "args": [
-        "--creator",
-        "expoparker",
-        "--limit",
-        "5"
-      ],
-      "cwd": "${workspaceFolder}",
+      "module": "profiling.dev.run_resonance_from_video",
       "console": "integratedTerminal",
-      "justMyCode": true
+      "python": "/opt/anaconda3/envs/resonance/bin/python"
     }
   ]
 }

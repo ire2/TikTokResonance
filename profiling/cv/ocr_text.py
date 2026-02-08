@@ -2,6 +2,7 @@ from functools import lru_cache
 from typing import List
 
 import numpy as np
+from profiling.utils.device import get_preferred_device
 
 from utils.trace import trace
 
@@ -10,7 +11,9 @@ from utils.trace import trace
 @trace
 def _get_reader():
     import easyocr
-    return easyocr.Reader(["en"], gpu=False)
+    device = get_preferred_device()
+    use_gpu = device == "cuda"
+    return easyocr.Reader(["en"], gpu=use_gpu)
 
 
 def estimate_text_density(frames: List[np.ndarray]) -> float:

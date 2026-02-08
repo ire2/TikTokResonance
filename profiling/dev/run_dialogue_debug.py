@@ -15,7 +15,7 @@ from profiling.nlp.dialogue_signals import (
 from profiling.nlp.solo_rant import compute_solo_rant_signal
 
 CREATOR_ID = "expoparker"
-CAPTION_DIR = Path("profiling/raw_captions")
+CAPTION_DIR = Path("data/raw_captions")
 LIMIT = 3
 
 

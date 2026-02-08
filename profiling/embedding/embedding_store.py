@@ -7,7 +7,7 @@ from typing import Dict
 from utils.trace import trace
 
 
-EMBEDDING_DIR = Path("profiling/metadata/embeddings_store")
+EMBEDDING_DIR = Path("data/embeddings_store")
 EMBEDDING_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -56,7 +56,8 @@ def load_creator_embeddings(
 
         segments = [
             {
-                "text": t["text"],
+                "text": t.get("text"),
+                "video_id": t.get("video_id"),
                 "embedding": emb,
             }
             for t, emb in zip(texts, seg_embeddings)
@@ -92,7 +93,13 @@ def save_creator_embedding(
 
         with open(base.with_suffix(".segments.json"), "w") as f:
             json.dump(
-                [{"text": s["text"]} for s in segments],
+                [
+                    {
+                        "text": s.get("text"),
+                        "video_id": s.get("video_id"),
+                    }
+                    for s in segments
+                ],
                 f,
                 indent=2,
             )

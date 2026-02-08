@@ -8,8 +8,8 @@ from sklearn.preprocessing import LabelEncoder
 from joblib import dump
 
 
-LABELS_PATH = Path("profiling/metadata/labels/format_labels.csv")
-RAW_VISUAL_DIR = Path("profiling/metadata/raw_visual")
+LABELS_PATH = Path("data/labels/format_labels.csv")
+RAW_VISUAL_DIR = Path("data/raw_visual")
 MODEL_PATH = Path("profiling/models/format_rf.joblib")
 
 

@@ -3,13 +3,19 @@ import yaml
 
 
 BASE_DIR = Path(__file__).resolve().parents[1]
-CONFIG_PATH = BASE_DIR / "config.yaml"
+ROOT_DIR = BASE_DIR.parent
+CONFIG_PATH = ROOT_DIR / "config.yaml"
+FALLBACK_CONFIG_PATH = BASE_DIR / "resonance" / "config.yaml"
 
 
 def load_config(path: Path = CONFIG_PATH) -> dict:
-    if not path.exists():
-        raise FileNotFoundError(f"Config not found: {path}")
-    return yaml.safe_load(path.read_text()) or {}
+    if path.exists():
+        return yaml.safe_load(path.read_text()) or {}
+    if FALLBACK_CONFIG_PATH.exists():
+        return yaml.safe_load(FALLBACK_CONFIG_PATH.read_text()) or {}
+    raise FileNotFoundError(
+        f"Config not found: {path} (also checked {FALLBACK_CONFIG_PATH})"
+    )
 
 
 def get_active_creator(path: Path = CONFIG_PATH) -> str:
@@ -18,6 +24,16 @@ def get_active_creator(path: Path = CONFIG_PATH) -> str:
     if not creator_id:
         raise ValueError("active_creator missing in profiling/config.yaml")
     return creator_id
+
+
+def get_training_creators(path: Path = CONFIG_PATH) -> list[str]:
+    config = load_config(path)
+    creators = config.get("training_creators")
+    if not creators:
+        return []
+    if isinstance(creators, list):
+        return [str(c) for c in creators]
+    return [str(creators)]
 
 
 def get_test_creator(path: Path = CONFIG_PATH) -> list[str]:

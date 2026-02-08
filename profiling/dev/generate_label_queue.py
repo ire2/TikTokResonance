@@ -5,9 +5,9 @@ import csv
 from profiling.utils.creator_config import get_active_creator
 
 
-RAW_VISUAL_DIR = Path("profiling/metadata/raw_visual")
-RAW_DATA_PATH = Path("profiling/metadata/raw_data/creator_metadata.json")
-OUT_PATH = Path("profiling/metadata/labels/format_labels.csv")
+RAW_VISUAL_DIR = Path("data/raw_visual")
+RAW_DATA_PATH = Path("data/raw_data/creator_metadata.json")
+OUT_PATH = Path("data/labels/format_labels.csv")
 
 DEFAULT_FORMAT_LABELS = [
     "talking_head",
@@ -17,6 +17,7 @@ DEFAULT_FORMAT_LABELS = [
     "dance",
     "duo_or_group",
     "tutorial_or_demo",
+    "educational",
     "skit_or_comedy",
     "product_or_ad",
     "food_or_cooking",
@@ -132,8 +133,16 @@ def main():
             "posted_at": meta.get("posted_at"),
         })
 
-    _write_rows(rows)
-    print(f"[OK] Wrote {len(rows)} rows to {OUT_PATH}")
+    merged = list(existing.values())
+    existing_keys = {(r.get("creator_id"), r.get("video_id")) for r in merged}
+    for r in rows:
+        key = (r.get("creator_id"), r.get("video_id"))
+        if key not in existing_keys:
+            merged.append(r)
+            existing_keys.add(key)
+
+    _write_rows(merged)
+    print(f"[OK] Wrote {len(merged)} rows to {OUT_PATH}")
     print(
         "[LABELS] Open the labeling UI with:\n"
         "  uvicorn profiling.label_ui.app:app --reload"

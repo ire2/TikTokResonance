@@ -2,6 +2,7 @@ import numpy as np
 from typing import List
 from sentence_transformers import SentenceTransformer
 from utils.trace import trace
+import os
 
 
 class TextEmbedder:
@@ -17,7 +18,20 @@ class TextEmbedder:
     ):
         self.model_name = model_name
         self.normalize = normalize
-        self.model = SentenceTransformer(model_name)
+        device = os.getenv("EMBEDDING_DEVICE")
+        if not device:
+            try:
+                import torch
+                if torch.backends.mps.is_available():
+                    device = "mps"
+                elif torch.cuda.is_available():
+                    device = "cuda"
+                else:
+                    device = "cpu"
+            except Exception:
+                device = "cpu"
+
+        self.model = SentenceTransformer(model_name, device=device)
         self.dim = self.model.get_sentence_embedding_dimension()
 
     @trace

@@ -6,7 +6,7 @@ from profiling.nlp.asr import run_asr  # your ASR file
 from profiling.utils.video_paths import video_path
 
 
-RAW_CAPTION_DIR = Path("profiling/metadata/raw_captions")
+RAW_CAPTION_DIR = Path("data/raw_captions")
 RAW_CAPTION_DIR.mkdir(parents=True, exist_ok=True)
 
 

@@ -40,13 +40,13 @@ def build_creator_embedding(
 
     embeddings = embedder.embed_texts(texts)
 
-    segments = [
-        {
+    segments = []
+    for s, text, emb in zip(transcript_segments, texts, embeddings):
+        segments.append({
             "text": text,
             "embedding": emb,
-        }
-        for text, emb in zip(texts, embeddings)
-    ]
+            "video_id": s.get("video_id"),
+        })
 
     creator_vec = embeddings.mean(axis=0)
 

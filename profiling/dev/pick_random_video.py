@@ -15,7 +15,16 @@ def main():
     if not videos:
         raise RuntimeError("No videos returned from metadata fetch")
 
-    choice = random.choice(videos)
+    existing_ids = set()
+    for p in Path("data/raw_videos").glob(f"{creator_id}_*.mp4"):
+        vid = p.stem.replace(f"{creator_id}_", "")
+        existing_ids.add(vid)
+
+    candidates = [v for v in videos if v.get("id") not in existing_ids]
+    if not candidates:
+        raise RuntimeError("No new videos available (all already downloaded)")
+
+    choice = random.choice(candidates)
     video_id = choice.get("id")
     if not video_id:
         raise RuntimeError("Random video missing id")

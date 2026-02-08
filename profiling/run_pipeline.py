@@ -6,7 +6,7 @@ import os
 from profiling.ingestion.ingest_creator import ingest_creator
 from .profile_generator import generate_profile, write_profile
 from profiling.dev.generate_label_queue import main as generate_label_queue
-from profiling.utils.creator_config import get_active_creator
+from profiling.utils.creator_config import get_active_creator, get_training_creators
 
 
 # ------------------------
@@ -16,8 +16,8 @@ from profiling.utils.creator_config import get_active_creator
 BASE_DIR = Path(__file__).resolve().parent
 
 INPUT_PATH = BASE_DIR / "input" / "creators.yaml"
-RAW_DATA_PATH = BASE_DIR / "metadata" / "raw_data" / "creator_metadata.json"
-DRAFTS_DIR = BASE_DIR / "drafts"
+RAW_DATA_PATH = Path("data/raw_data/creator_metadata.json")
+DRAFTS_DIR = Path("data/drafts")
 
 CLEAN_RUN = os.getenv("CLEAN_RUN", "false").lower() == "true"
 GENERATE_LABELS = os.getenv("GENERATE_LABELS", "false").lower() == "true"
@@ -84,11 +84,19 @@ def run_profiling_from_yaml():
     if CLEAN_RUN:
         clear_pycache(BASE_DIR)
 
-    creator_id = get_active_creator()
-    run_profiling_for_creator(
-        creator_id=creator_id,
-        video_limit=30,
-    )
+    training_creators = get_training_creators()
+    if training_creators:
+        for creator_id in training_creators:
+            run_profiling_for_creator(
+                creator_id=creator_id,
+                video_limit=30,
+            )
+    else:
+        creator_id = get_active_creator()
+        run_profiling_for_creator(
+            creator_id=creator_id,
+            video_limit=30,
+        )
 
     print("\nProfiling complete. All drafts ready.")
 

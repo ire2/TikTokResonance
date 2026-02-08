@@ -13,8 +13,9 @@ from .normalize import normalize_videos
 
 
 BASE_DIR = Path(__file__).resolve().parents[1]
-RAW_DATA_DIR = BASE_DIR / "metadata" / "raw_data"
+RAW_DATA_DIR = Path("data/raw_data")
 RAW_DATA_PATH = RAW_DATA_DIR / "creator_metadata.json"
+LEGACY_RAW_DATA_PATH = BASE_DIR / "metadata" / "raw_data" / "creator_metadata.json"
 
 
 @trace
@@ -27,7 +28,7 @@ def ingest_creator(creator_handle: str, video_limit: int = 30):
     - persist to raw_data
     """
 
-    RAW_DATA_DIR.mkdir(exist_ok=True)
+    RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     scan_limit = get_default_scan_limit()
     selection_mode = get_selection_mode()
@@ -43,11 +44,13 @@ def ingest_creator(creator_handle: str, video_limit: int = 30):
         selection_metric=selection_metric,
     )
 
-    normalized = normalize_videos(raw_videos)
+    normalized = normalize_videos(raw_videos, creator_id=creator_handle)
 
     # Load existing metadata
     if RAW_DATA_PATH.exists():
         existing = json.loads(RAW_DATA_PATH.read_text())
+    elif LEGACY_RAW_DATA_PATH.exists():
+        existing = json.loads(LEGACY_RAW_DATA_PATH.read_text())
     else:
         existing = {}
 

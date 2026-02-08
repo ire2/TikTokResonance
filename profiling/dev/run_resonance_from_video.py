@@ -45,14 +45,14 @@ def extract_idea_text(video_path: Path) -> str:
 
 
 def main():
-    creator_id = get_test_creator()
+    creator_id = get_active_creator()
     model_name = get_default_model_name()
 
     video_path = find_latest_video()
     print(f"[VIDEO] Using {video_path}")
 
     # Load creator profile and embeddings
-    profile_path = Path("profiling/drafts") / f"{creator_id}_draft.yaml"
+    profile_path = Path("data/drafts") / f"{creator_id}_draft.yaml"
     if not profile_path.exists():
         raise FileNotFoundError(f"Missing profile: {profile_path}")
     creator_profile = yaml.safe_load(profile_path.read_text())

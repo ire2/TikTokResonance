@@ -33,7 +33,7 @@ classifier = SimpleFormatClassifier()  # global instance for simplicity
 
 
 @trace
-def normalize_videos(raw_videos):
+def normalize_videos(raw_videos, creator_id: str | None = None):
     """
     Convert raw yt-dlp video objects into our internal raw_data schema.
 
@@ -50,7 +50,8 @@ def normalize_videos(raw_videos):
     for idx, v in enumerate(raw_videos, start=1):
         vid = v.get("id")
         if vid:
-            print(f"[NORMALIZE] {idx}/{total} video_id={vid}")
+            prefix = f"[NORMALIZE][{creator_id}]" if creator_id else "[NORMALIZE]"
+            print(f"{prefix} {idx}/{total} video_id={vid}")
         normalized.append({
             "video_id": v.get("id"),
             "local_path": v.get("local_path"),

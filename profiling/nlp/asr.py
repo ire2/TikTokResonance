@@ -7,7 +7,7 @@ from utils.trace import trace
 
 
 # Canonical location for all caption artifacts
-CAPTION_DIR = Path("profiling/metadata/raw_captions")
+CAPTION_DIR = Path("data/raw_captions")
 CAPTION_DIR.mkdir(parents=True, exist_ok=True)
 
 

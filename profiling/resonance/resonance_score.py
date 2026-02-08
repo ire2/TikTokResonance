@@ -13,6 +13,7 @@ def compute_resonance(
     idea_motion_intensity: float | None = None,
     idea_text_density: float | None = None,
     idea_format: str | None = None,
+    per_video_visuals: Dict | None = None,
 ) -> Dict:
     """
     Compute resonance between an idea and a creator.
@@ -114,9 +115,37 @@ def compute_resonance(
             max(0.0, text_density_alignment), 3
         )
 
+    # ---- per-video visual alignment from top matches ----
+    if per_video_visuals and evidence:
+        top_video_ids = list({
+            e.get("video_id") for e in evidence if e.get("video_id")
+        })
+        if top_video_ids:
+            mot_vals = []
+            txt_vals = []
+            for vid in top_video_ids:
+                sig = per_video_visuals.get(vid) or {}
+                if idea_motion_intensity is not None and sig.get("motion_intensity") is not None:
+                    mot_vals.append(
+                        1.0 - abs(float(idea_motion_intensity) - float(sig.get("motion_intensity")))
+                    )
+                if idea_text_density is not None:
+                    v_txt = sig.get("text_density_ocr") or sig.get("text_density_heuristic")
+                    if v_txt is not None:
+                        txt_vals.append(
+                            1.0 - abs(float(idea_text_density) - float(v_txt))
+                        )
+            if mot_vals:
+                motion_alignment = round(max(0.0, sum(mot_vals) / len(mot_vals)), 3)
+            if txt_vals:
+                text_density_alignment = round(max(0.0, sum(txt_vals) / len(txt_vals)), 3)
+
     # ---- semantic gate (embedding similarity) ----
     semantic_gate = None
-    creator_vec = creator_embedding_payload.get("embedding")
+    creator_vec = (
+        creator_embedding_payload.get("creator_embedding")
+        or creator_embedding_payload.get("embedding")
+    )
     if creator_vec is not None:
         sim = float(cos_sim(idea_embedding, creator_vec)[0][0])
         semantic_gate = round(max(0.0, min(1.0, sim)), 3)
@@ -146,6 +175,10 @@ def compute_resonance(
     if semantic_gate is not None:
         gate = max(0.5, semantic_gate)
         resonance_score = round(resonance_score * gate, 4)
+
+    # Hard cap for low semantic alignment
+    if semantic_alignment < 0.35:
+        resonance_score = min(resonance_score, 0.25)
 
     return {
         "semantic_alignment": semantic_alignment,

@@ -6,9 +6,9 @@ from profiling.utils.creator_config import get_active_creator
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
-RAW_DATA_PATH = BASE_DIR / "profiling" / "metadata" / "raw_data" / "creator_metadata.json"
+RAW_DATA_PATH = Path("data/raw_data/creator_metadata.json")
 CREATOR_ID = get_active_creator()
-PROFILE_PATH = BASE_DIR / "profiling" / "drafts" / f"{CREATOR_ID}_draft.yaml"
+PROFILE_PATH = Path("data/drafts") / f"{CREATOR_ID}_draft.yaml"
 
 
 def main():

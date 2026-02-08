@@ -5,7 +5,7 @@ __pycache__/
 
 #fluff files
 profiling/metadata/
-
+data/
 profiling/test/
 # C extensions
 *.so

@@ -16,7 +16,7 @@ from profiling.utils.creator_config import (
 BASE_DIR = Path(__file__).resolve().parents[2]
 CREATOR_ID = get_active_creator()
 MODEL_NAME = get_default_model_name()
-PROFILE_PATH = BASE_DIR / "profiling" / "drafts" / f"{CREATOR_ID}_draft.yaml"
+PROFILE_PATH = Path("data/drafts") / f"{CREATOR_ID}_draft.yaml"
 IDEA_MOTION_INTENSITY = 0.2
 IDEA_TEXT_DENSITY = 0.08
 IDEA_FORMAT = "talking_head"
