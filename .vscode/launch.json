@@ -2,10 +2,35 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run Resonance From Video",
+      "name": "Run Pipeline",
       "type": "python",
       "request": "launch",
-      "module": "profiling.dev.run_resonance_from_video",
+      "module": "pipeline.run_main",
+      "console": "integratedTerminal",
+      "python": "/opt/anaconda3/envs/resonance/bin/python",
+      "env": {
+        "RUN_PROFILES": "true",
+        "BUILD_EMBEDDINGS": "true"
+      }
+    },
+    {
+      "name": "Run Pipeline (Force Profiles)",
+      "type": "python",
+      "request": "launch",
+      "module": "pipeline.run_main",
+      "console": "integratedTerminal",
+      "python": "/opt/anaconda3/envs/resonance/bin/python",
+      "env": {
+        "RUN_PROFILES": "true",
+        "FORCE_PROFILES": "true",
+        "BUILD_EMBEDDINGS": "true"
+      }
+    },
+    {
+      "name": "Generate Label CSV",
+      "type": "python",
+      "request": "launch",
+      "module": "profiling.dev.generate_label_queue",
       "console": "integratedTerminal",
       "python": "/opt/anaconda3/envs/resonance/bin/python"
     }

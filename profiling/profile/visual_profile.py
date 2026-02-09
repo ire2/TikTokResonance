@@ -62,6 +62,12 @@ def compute_visual_profile(creator_id: str, videos: list) -> dict:
         else:
             work.append(video_id)
 
+    def _persist_cache():
+        try:
+            cache_path.write_text(json.dumps(cache, indent=2))
+        except Exception:
+            pass
+
     if workers > 1 and work:
         print(f"[VISUAL][{creator_id}] Using {workers} workers")
         ctx = mp.get_context("spawn")
@@ -73,6 +79,7 @@ def compute_visual_profile(creator_id: str, videos: list) -> dict:
                 if sig:
                     cache[vid] = sig
                     signals.append(sig)
+                    _persist_cache()
                 done += 1
                 if done % 5 == 0 or done == total:
                     print(f"[VISUAL][{creator_id}] processed {done}/{total}")
@@ -86,12 +93,10 @@ def compute_visual_profile(creator_id: str, videos: list) -> dict:
             if sig:
                 cache[vid] = sig
                 signals.append(sig)
+                _persist_cache()
 
     # persist cache
-    try:
-        cache_path.write_text(json.dumps(cache, indent=2))
-    except Exception:
-        pass
+    _persist_cache()
 
     def avg(key):
         vals = [s[key] for s in signals if key in s]

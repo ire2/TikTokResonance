@@ -1,0 +1,96 @@
+creator_id: expoparker
+generated_by: Tik Tok Resonance Profiler v0.1
+status: draft
+analysis_window: last_30_videos
+observed_patterns:
+  dominant_formats:
+  - skit_or_comedy
+  underused_formats: []
+  avg_duration_sec: 24.6
+modality_bias:
+  voice: high
+  text: high
+visual_signals:
+  avg_face_presence_ratio: 0.733
+  avg_talking_head_confidence: 0.758
+  avg_motion_intensity: 0.058
+  avg_face_area_stability: 0.222
+  avg_face_area_ratio: 0.026
+  avg_face_area_ratio_std: 0.022
+  avg_brightness_mean: 0.435
+  avg_brightness_std: 0.022
+  avg_saturation_mean: 0.295
+  avg_color_temperature_index: -0.066
+  avg_edge_density: 0.06
+  avg_text_density_heuristic: 0.688
+  avg_text_density_ocr: 0.012
+  avg_shot_change_rate: 0.0
+  avg_camera_motion_intensity: 0.194
+  avg_camera_stability: 0.806
+  avg_object_presence_ratio: 0.996
+  avg_objects_per_frame: 1.925
+  avg_audio_energy: 0.126
+  avg_music_confidence: 0.204
+nlp_captioning_gate:
+  weight: 1.0
+  confidence: high
+  reason: consistent talking-head presence
+profile_nlp:
+  dialogue_video_ratio: 1.0
+  solo_rant_ratio: 0.5
+  avg_speakers: 1.6
+  topic_profile:
+    topics:
+    - cluster: 4
+      size: 11
+      top_terms:
+      - okay
+      - just
+      - don
+      - oh
+      - idea
+      - boyfriend
+    - cluster: 3
+      size: 7
+      top_terms:
+      - yeah
+      - oh
+      - good
+      - fuck
+      - big
+      - dude
+    - cluster: 1
+      size: 5
+      top_terms:
+      - look
+      - nice
+      - just
+      - really
+      - let
+      - like
+    - cluster: 2
+      size: 4
+      top_terms:
+      - thanks
+      - cat
+      - weird
+      - hi
+      - oh
+      - cute
+    - cluster: 0
+      size: 2
+      top_terms:
+      - ve
+      - conversation
+      - laughing
+      - good
+      - just
+      - happy
+    num_topics: 5
+    num_docs: 29
+creator_embedding:
+  model: BAAI/bge-large-en-v1.5
+  dim: 1024
+  num_segments: 48
+  has_segment_memory: true
+human_review_required: true

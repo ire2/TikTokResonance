@@ -1,0 +1,91 @@
+creator_id: natsingssongs
+generated_by: Tik Tok Resonance Profiler v0.1
+status: draft
+analysis_window: last_30_videos
+observed_patterns:
+  dominant_formats: []
+  underused_formats: []
+  avg_duration_sec: 40
+modality_bias:
+  voice: high
+  text: high
+visual_signals:
+  avg_face_presence_ratio: 0.742
+  avg_talking_head_confidence: 0.79
+  avg_motion_intensity: 0.063
+  avg_face_area_stability: 0.253
+  avg_face_area_ratio: 0.028
+  avg_face_area_ratio_std: 0.021
+  avg_brightness_mean: 0.453
+  avg_brightness_std: 0.09
+  avg_saturation_mean: 0.35
+  avg_color_temperature_index: -0.065
+  avg_edge_density: 0.029
+  avg_text_density_heuristic: 0.489
+  avg_text_density_ocr: 0.024
+  avg_shot_change_rate: 0.006
+  avg_camera_motion_intensity: 0.25
+  avg_camera_stability: 0.75
+  avg_object_presence_ratio: 0.929
+  avg_objects_per_frame: 2.833
+  avg_audio_energy: 0.837
+  avg_music_confidence: 0.261
+nlp_captioning_gate:
+  weight: 1.0
+  confidence: high
+  reason: consistent talking-head presence
+profile_nlp:
+  dialogue_video_ratio: 1.0
+  solo_rant_ratio: 0.767
+  avg_speakers: 1.23
+  topic_profile:
+    topics:
+    - cluster: 1
+      size: 10
+      top_terms:
+      - love
+      - queen
+      - did
+      - like
+      - music
+      - long
+    - cluster: 2
+      size: 10
+      top_terms:
+      - got
+      - just
+      - ve got
+      - don
+      - ve
+      - wasn
+    - cluster: 3
+      size: 4
+      top_terms:
+      - ll
+      - don
+      - man
+      - away
+      - buy
+      - wash
+    - cluster: 0
+      size: 3
+      top_terms:
+      - time
+      - having
+      - let
+      - new
+      - year
+      - man
+    - cluster: 4
+      size: 2
+      top_terms:
+      - killed
+      - plant
+      - kids
+      - kids killed
+      - kill
+      - kill 30
+    num_topics: 5
+    num_docs: 29
+creator_embedding: null
+human_review_required: true

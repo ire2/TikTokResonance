@@ -1,0 +1,1 @@
+{"text": " Boop!", "segments": [{"id": 0, "seek": 0, "start": 0.0, "end": 2.0, "text": " Boop!", "tokens": [50364, 3286, 404, 0, 50464], "temperature": 0.0, "avg_logprob": -0.9806556701660156, "compression_ratio": 0.38461538461538464, "no_speech_prob": 0.40935590863227844}], "language": "en"}

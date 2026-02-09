@@ -10,7 +10,7 @@ from profiling.utils.creator_config import (
     get_selection_percentile,
     get_selection_metric,
 )
-from .normalize import normalize_videos
+from .normalize import normalize_videos, normalize_video
 
 
 BASE_DIR = Path(__file__).resolve().parents[1]
@@ -45,6 +45,17 @@ def ingest_creator(creator_handle: str, video_limit: int = 30):
     else:
         existing = {}
 
+    existing_list = existing.get(creator_handle, [])
+    existing_ids = {
+        v.get("video_id") for v in existing_list if v.get("video_id")
+    }
+    if len(existing_ids) >= video_limit:
+        print(
+            f"[INGEST][{creator_handle}] existing videos: {len(existing_ids)}; "
+            f"target={video_limit}. Skipping metadata scan."
+        )
+        return existing_list
+
     raw_videos = fetch_raw_videos(
         creator_handle=creator_handle,
         video_limit=video_limit,
@@ -54,31 +65,48 @@ def ingest_creator(creator_handle: str, video_limit: int = 30):
         selection_metric=selection_metric,
     )
 
-    existing_list = existing.get(creator_handle, [])
-    existing_ids = {v.get("video_id")
-                    for v in existing_list if v.get("video_id")}
+    existing_by_id = {
+        v.get("video_id"): v for v in existing_list if v.get("video_id")
+    }
+    raw_ids = [v.get("id") for v in raw_videos if v.get("id")]
+
     print(
         f"[INGEST][{creator_handle}] existing videos: {len(existing_ids)}; fetched: {len(raw_videos)}"
     )
-    new_raw = [v for v in raw_videos if v.get("id") not in existing_ids]
 
-    if not new_raw:
+    to_normalize = [v for v in raw_videos if v.get("id") not in existing_ids]
+    normalized_by_id = {}
+    if to_normalize:
+        total = len(to_normalize)
+        for idx, raw in enumerate(to_normalize, start=1):
+            norm = normalize_video(
+                raw, creator_id=creator_handle, idx=idx, total=total)
+            vid = norm.get("video_id")
+            if not vid:
+                continue
+            normalized_by_id[vid] = norm
+            existing_by_id[vid] = norm
+            existing[creator_handle] = list(existing_by_id.values())
+            RAW_DATA_PATH.write_text(json.dumps(existing, indent=2))
+
+    rebuilt = []
+    for v in raw_videos:
+        vid = v.get("id")
+        if not vid:
+            continue
+        if vid in normalized_by_id:
+            rebuilt.append(normalized_by_id[vid])
+        elif vid in existing_by_id:
+            rebuilt.append(existing_by_id[vid])
+
+    if not to_normalize and set(raw_ids) == existing_ids and len(rebuilt) == len(existing_list):
         print(
-            f"[INGEST][{creator_handle}] No new videos found. Skipping normalization.")
+            f"[INGEST][{creator_handle}] No new videos found. Skipping normalization."
+        )
         return existing_list
 
-    normalized = normalize_videos(new_raw, creator_id=creator_handle)
-
-    merged = list(existing_list)
-    merged_ids = {v.get("video_id") for v in merged if v.get("video_id")}
-    for v in normalized:
-        vid = v.get("video_id")
-        if vid and vid not in merged_ids:
-            merged.append(v)
-            merged_ids.add(vid)
-
-    existing[creator_handle] = merged
+    existing[creator_handle] = rebuilt
 
     RAW_DATA_PATH.write_text(json.dumps(existing, indent=2))
 
-    return normalized
+    return list(normalized_by_id.values())

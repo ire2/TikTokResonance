@@ -30,7 +30,7 @@ def generate_profile(creator_id: str, raw_data_path: str) -> dict:
     # ---- assemble profile ----
     profile = {
         "creator_id": creator_id,
-        "generated_by": "ConstraintSpace Profiling v0.1",
+        "generated_by": "Tik Tok Resonance Profiler v0.1",
         "status": "draft",
         "analysis_window": f"last_{len(videos)}_videos",
 

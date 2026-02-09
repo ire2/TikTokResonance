@@ -4,6 +4,8 @@ run: ; python -m pipeline.run_main
 
 run-skip: ; RUN_PROFILES=false BUILD_EMBEDDINGS=false python -m pipeline.run_main
 
+embed: ; BUILD_EMBEDDINGS=true RUN_PROFILES=false python -m pipeline.run_main
+
 labels: ; RUN_LABELS=true RUN_PROFILES=false BUILD_EMBEDDINGS=false python -m pipeline.run_main
 
 ui: ; uvicorn profiling.label_ui.app:app --reload

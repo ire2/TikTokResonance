@@ -10,6 +10,7 @@ from utils.trace import trace
 # Canonical location for raw videos
 RAW_VIDEO_DIR = Path("data/raw_videos")
 RAW_VIDEO_DIR.mkdir(parents=True, exist_ok=True)
+MP4_FORMAT_SELECTOR = "bv*[ext=mp4]+ba[ext=m4a]/bv*[ext=mp4]/b[ext=mp4]"
 
 
 def _yt_dlp_common_args() -> List[str]:
@@ -24,6 +25,23 @@ def _yt_dlp_common_args() -> List[str]:
     if extra:
         args += extra.split()
     return args
+
+
+def _video_mp4_path(creator_handle: str, video_id: str) -> Path:
+    return RAW_VIDEO_DIR / f"{creator_handle}_{video_id}.mp4"
+
+
+def _download_video_mp4(url: str, out_template: str) -> bool:
+    cmd = [
+        "yt-dlp",
+        "-f", MP4_FORMAT_SELECTOR,
+        "--merge-output-format", "mp4",
+        "-o", out_template,
+        url,
+    ] + _yt_dlp_common_args()
+
+    result = subprocess.run(cmd)
+    return result.returncode == 0
 
 
 @trace
@@ -148,41 +166,47 @@ def download_missing_videos(
     """
 
     missing = []
+    downloaded = []
 
     for v in videos:
         video_id = v["id"]
-        path = RAW_VIDEO_DIR / f"{creator_handle}_{video_id}.mp4"
+        path = _video_mp4_path(creator_handle, video_id)
 
         v["local_path"] = str(path)
         v["downloaded"] = path.exists()
 
         if not v["downloaded"]:
             missing.append(v)
+        else:
+            downloaded.append(v)
 
     if not missing:
         print("[INGEST] All videos already present. Skipping download.")
-        return
+        return downloaded
 
     print(f"[INGEST] Downloading {len(missing)} videos...")
 
-    url = f"https://www.tiktok.com/@{creator_handle}"
+    for v in missing:
+        video_id = v["id"]
+        url = f"https://www.tiktok.com/@{creator_handle}/video/{video_id}"
+        out_template = str(RAW_VIDEO_DIR / f"{creator_handle}_%(id)s.%(ext)s")
+        ok = _download_video_mp4(url, out_template)
+        v["downloaded"] = ok and _video_mp4_path(
+            creator_handle, video_id).exists()
+        if v["downloaded"]:
+            downloaded.append(v)
+        else:
+            print(
+                f"[INGEST] Skipping {video_id}: no mp4 format available.")
 
-    cmd = [
-        "yt-dlp",
-        "-f", "bv*+ba/best",
-        "--merge-output-format", "mp4",
-        "-o", str(RAW_VIDEO_DIR / f"{creator_handle}_%(id)s.%(ext)s"),
-        "--playlist-end", str(video_limit),
-        url,
-    ] + _yt_dlp_common_args()
-
-    subprocess.run(cmd, check=True)
+    return downloaded
 
 
 @trace
 def download_selected_videos(
     creator_handle: str,
     videos: List[Dict],
+    limit: Optional[int] = None,
 ):
     """
     Download mp4 files for specific video IDs only.
@@ -192,34 +216,40 @@ def download_selected_videos(
         return
 
     missing = []
+    downloaded = []
 
     for v in videos:
         video_id = v["id"]
-        path = RAW_VIDEO_DIR / f"{creator_handle}_{video_id}.mp4"
+        path = _video_mp4_path(creator_handle, video_id)
         v["local_path"] = str(path)
         v["downloaded"] = path.exists()
         if not v["downloaded"]:
             missing.append(v)
+        else:
+            downloaded.append(v)
 
     if not missing:
         print("[INGEST] All selected videos already present. Skipping download.")
-        return
+        return downloaded
 
     print(f"[INGEST] Downloading {len(missing)} selected videos...")
 
-    urls = [
-        f"https://www.tiktok.com/@{creator_handle}/video/{v['id']}"
-        for v in missing
-    ]
+    for v in missing:
+        if limit and len(downloaded) >= limit:
+            break
+        video_id = v["id"]
+        url = f"https://www.tiktok.com/@{creator_handle}/video/{video_id}"
+        out_template = str(RAW_VIDEO_DIR / f"{creator_handle}_%(id)s.%(ext)s")
+        ok = _download_video_mp4(url, out_template)
+        v["downloaded"] = ok and _video_mp4_path(
+            creator_handle, video_id).exists()
+        if v["downloaded"]:
+            downloaded.append(v)
+        else:
+            print(
+                f"[INGEST] Skipping {video_id}: no mp4 format available.")
 
-    cmd = [
-        "yt-dlp",
-        "-f", "bv*+ba/best",
-        "--merge-output-format", "mp4",
-        "-o", str(RAW_VIDEO_DIR / f"{creator_handle}_%(id)s.%(ext)s"),
-    ] + _yt_dlp_common_args() + urls
-
-    subprocess.run(cmd, check=True)
+    return downloaded
 
 
 def _metric_value(v: Dict, metric: str) -> int:
@@ -302,16 +332,24 @@ def fetch_raw_videos(
         return []
 
     if selection_mode:
-        fetch_captions_for_videos(creator_handle, selected)
-        download_selected_videos(creator_handle, selected)
-        return selected
+        selected_ids = {v.get("id") for v in selected if v.get("id")}
+        pool = list(selected)
+        # Always allow backfill from the full scan pool
+        for v in videos:
+            vid = v.get("id")
+            if vid and vid not in selected_ids:
+                pool.append(v)
 
-    fetch_captions(creator_handle, video_limit)
+        downloaded = download_selected_videos(
+            creator_handle, pool, limit=video_limit)
+        fetch_captions_for_videos(creator_handle, downloaded)
+        return downloaded
 
-    download_missing_videos(
+    downloaded = download_missing_videos(
         creator_handle=creator_handle,
         videos=selected,
         video_limit=video_limit,
     )
 
-    return selected
+    fetch_captions_for_videos(creator_handle, downloaded)
+    return downloaded

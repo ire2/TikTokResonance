@@ -15,8 +15,9 @@ def compute_nlp_profile(creator_id: str, videos: list) -> dict:
     debug_video = os.getenv("DEBUG_VIDEO", "false").lower() == "true"
     total = len(videos)
     processed = 0
-
+    print(f"[NLP][{creator_id}] Starting NLP Profile")
     for v in videos:
+
         video_id = v.get("video_id")
         if not video_id:
             continue
@@ -38,7 +39,8 @@ def compute_nlp_profile(creator_id: str, videos: list) -> dict:
         signals = compute_nlp_signals(transcript)
 
         # Build per-video document for topic modeling
-        doc = " ".join(s.get("text", "") for s in transcript.get("segments", []))
+        doc = " ".join(s.get("text", "")
+                       for s in transcript.get("segments", []))
         if doc:
             docs.append(doc)
 

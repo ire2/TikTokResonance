@@ -51,7 +51,6 @@ def run_asr(video_path: str, out_path: Path):
 
     subprocess.run(cmd, check=True)
 
-    # Whisper outputs <video_stem>.json — rename to canonical name
     generated = out_path.parent / (Path(video_path).stem + ".json")
 
     if not generated.exists():

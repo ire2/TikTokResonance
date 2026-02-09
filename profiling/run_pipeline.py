@@ -46,7 +46,7 @@ def run_profiling_for_creator(creator_id: str, video_limit: int = 30) -> Path:
     This function is:
     - non-interactive
     - deterministic
-    - callable by ConstraintSpace
+    - callable by TikTokResonance
 
     Returns:
         Path to draft profile YAML

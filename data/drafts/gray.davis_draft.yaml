@@ -1,0 +1,93 @@
+creator_id: gray.davis
+generated_by: Tik Tok Resonance Profiler v0.1
+status: draft
+analysis_window: last_30_videos
+observed_patterns:
+  dominant_formats:
+  - skit_or_comedy
+  underused_formats:
+  - educational
+  avg_duration_sec: 98.4
+modality_bias:
+  voice: high
+  text: high
+visual_signals:
+  avg_face_presence_ratio: 0.613
+  avg_talking_head_confidence: 0.677
+  avg_motion_intensity: 0.098
+  avg_face_area_stability: 0.059
+  avg_face_area_ratio: 0.026
+  avg_face_area_ratio_std: 0.038
+  avg_brightness_mean: 0.516
+  avg_brightness_std: 0.068
+  avg_saturation_mean: 0.349
+  avg_color_temperature_index: -0.108
+  avg_edge_density: 0.054
+  avg_text_density_heuristic: 0.645
+  avg_text_density_ocr: 0.007
+  avg_shot_change_rate: 0.001
+  avg_camera_motion_intensity: 0.412
+  avg_camera_stability: 0.588
+  avg_object_presence_ratio: 0.75
+  avg_objects_per_frame: 1.613
+  avg_audio_energy: 0.708
+  avg_music_confidence: 0.287
+nlp_captioning_gate:
+  weight: 1.0
+  confidence: high
+  reason: consistent talking-head presence
+profile_nlp:
+  dialogue_video_ratio: 1.0
+  solo_rant_ratio: 0.533
+  avg_speakers: 1.83
+  topic_profile:
+    topics:
+    - cluster: 3
+      size: 8
+      top_terms:
+      - better
+      - know
+      - coffee
+      - bad
+      - bring
+      - fruit
+    - cluster: 0
+      size: 7
+      top_terms:
+      - cold
+      - trees
+      - iguanas
+      - tree
+      - iguana
+      - new
+    - cluster: 4
+      size: 6
+      top_terms:
+      - coconut
+      - cinnamon
+      - sugar
+      - just
+      - mmm
+      - cane
+    - cluster: 1
+      size: 5
+      top_terms:
+      - fruit
+      - came
+      - tree
+      - just
+      - fruits
+      - trees
+    - cluster: 2
+      size: 4
+      top_terms:
+      - stone
+      - crab
+      - stone crab
+      - claws
+      - lobster
+      - crabs
+    num_topics: 5
+    num_docs: 30
+creator_embedding: null
+human_review_required: true
