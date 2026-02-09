@@ -2,6 +2,7 @@ from pathlib import Path
 import yaml
 
 from profiling.embedding.embedder import TextEmbedder
+from utils.warnings import silence_common_warnings
 from resonance.idea_encoder import encode_idea
 from resonance.resonance_score import compute_resonance
 from resonance.resonance_report import build_resonance_report
@@ -28,6 +29,7 @@ Mukbang sushi. Mukbang is a genre of social media content where creators eat lar
 
 
 def main():
+    silence_common_warnings()
     print("\n[RESONANCE DEBUG] Starting\n")
 
     if not PROFILE_PATH.exists():

@@ -101,6 +101,5 @@ def compute_camera_motion_intensity(
     if not mags:
         return 0.0
 
-    # Normalize magnitude; cap at 10 for stability
     norm = min(1.0, float(np.mean(mags) / 10.0))
     return round(norm, 3)

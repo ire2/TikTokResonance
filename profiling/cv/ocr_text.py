@@ -3,6 +3,9 @@ from typing import List
 
 import numpy as np
 from profiling.utils.device import get_preferred_device
+import contextlib
+import os
+import sys
 
 from utils.trace import trace
 
@@ -13,6 +16,9 @@ def _get_reader():
     import easyocr
     device = get_preferred_device()
     use_gpu = device == "cuda"
+    if os.getenv("QUIET_WARNINGS", "true").lower() == "true":
+        with open(os.devnull, "w") as f, contextlib.redirect_stdout(f), contextlib.redirect_stderr(f):
+            return easyocr.Reader(["en"], gpu=use_gpu)
     return easyocr.Reader(["en"], gpu=use_gpu)
 
 

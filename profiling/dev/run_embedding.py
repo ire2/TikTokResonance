@@ -12,6 +12,7 @@ from profiling.utils.creator_config import (
     get_default_caption_limit,
     get_default_model_name,
 )
+from utils.warnings import silence_common_warnings
 
 # ---------------- CONFIG ----------------
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -23,6 +24,7 @@ LIMIT = get_default_caption_limit()
 
 
 def main():
+    silence_common_warnings()
     caption_files = sorted(
         CAPTION_DIR.glob(f"{CREATOR_ID}_*.json")
     )[:LIMIT]

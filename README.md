@@ -1,6 +1,6 @@
-# Resonance Lab
+# TikTok Resonance 
 
-This repository is a **creator resonance lab** for evaluating whether an idea or draft video will fit (and potentially perform for) a specific creator.  
+This repository is a **creator resonance project** for evaluating whether an idea or draft video will fit (and potentially perform for) a specific creator.  
 It combines **CV signals**, **NLP signals**, and **semantic embeddings** into a single scoring pipeline.
 
 ---

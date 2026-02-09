@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import multiprocessing as mp
+from utils.warnings import silence_common_warnings
 
 from profiling.run_pipeline import run_profiling_for_creator
 from profiling.utils.creator_config import (
@@ -71,6 +72,7 @@ def build_embeddings_for_creator(creator_id: str):
 
 
 def main():
+    silence_common_warnings()
     training_creators = get_training_creators()
     if not training_creators:
         training_creators = [get_active_creator()]

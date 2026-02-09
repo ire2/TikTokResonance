@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from profiling.utils.creator_config import get_active_creator, get_default_model_name
+from utils.warnings import silence_common_warnings
 from profiling.embedding.embedder import TextEmbedder
 from profiling.embedding.embedding_store import load_creator_embeddings
 from resonance.idea_encoder import encode_idea
@@ -22,6 +23,7 @@ RAW_VISUAL_PATH = Path("data/raw_visual")
 DRAFTS_DIR = Path("data/drafts")
 
 app = FastAPI()
+silence_common_warnings()
 
 
 def _find_latest_video() -> Path:

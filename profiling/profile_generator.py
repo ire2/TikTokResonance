@@ -8,6 +8,7 @@ from profiling.profile.nlp_profile import compute_nlp_profile
 from profiling.profile.metadata_profile import compute_metadata_profile
 from profiling.profile.nlp_gate import compute_nlp_gate
 from profiling.embedding.embedding_store import load_creator_embeddings
+from profiling.utils.creator_config import get_default_model_name
 
 
 @trace
@@ -23,7 +24,7 @@ def generate_profile(creator_id: str, raw_data_path: str) -> dict:
 
     embedding_meta = load_creator_embeddings(
         creator_id=creator_id,
-        model_name="all-MiniLM-L6-v2",
+        model_name=get,
     )
 
     # ---- assemble profile ----

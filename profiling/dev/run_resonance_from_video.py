@@ -2,6 +2,7 @@ from pathlib import Path
 import yaml
 
 from profiling.embedding.embedder import TextEmbedder
+from utils.warnings import silence_common_warnings
 from profiling.embedding.embedding_store import load_creator_embeddings
 from resonance.idea_encoder import encode_idea
 from resonance.resonance_score import compute_resonance
@@ -45,6 +46,7 @@ def extract_idea_text(video_path: Path) -> str:
 
 
 def main():
+    silence_common_warnings()
     creator_id = get_active_creator()
     model_name = get_default_model_name()
 
