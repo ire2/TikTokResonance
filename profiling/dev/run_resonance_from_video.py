@@ -52,43 +52,61 @@ def main():
 
     video_path = find_latest_video()
     print(f"[VIDEO] Using {video_path}")
+    print(f"[RESONANCE] creator={creator_id} model={model_name}")
 
     # Load creator profile and embeddings
     profile_path = Path("data/drafts") / f"{creator_id}_draft.yaml"
     if not profile_path.exists():
         raise FileNotFoundError(f"Missing profile: {profile_path}")
+    print(f"[RESONANCE] Loading profile {profile_path}")
     creator_profile = yaml.safe_load(profile_path.read_text())
 
+    print("[RESONANCE] Loading creator embeddings")
     creator_embedding_payload = load_creator_embeddings(
         creator_id=creator_id,
         model_name=model_name,
     )
     if creator_embedding_payload is None:
         raise ValueError("Creator embeddings not found. Run run_embedding.py")
+    print(
+        f"[RESONANCE] Embeddings loaded (segments={creator_embedding_payload.get('num_segments')}, "
+        f"dim={creator_embedding_payload.get('dim')})"
+    )
 
     # Extract idea signals from video
+    print("[RESONANCE] Extracting visual signals")
     visual = extract_visual_signals(str(video_path))
     idea_motion_intensity = visual.get("motion_intensity")
     idea_text_density = (
         visual.get("text_density_ocr")
         or visual.get("text_density_heuristic")
     )
+    print(
+        f"[RESONANCE] Visual signals ready (motion={idea_motion_intensity}, text_density={idea_text_density})"
+    )
 
     # Format via learned classifier (if available)
     format_classifier = LearnedFormatClassifier()
     idea_format = None
     if format_classifier.is_ready():
+        print("[RESONANCE] Predicting format with learned classifier")
         idea_format = format_classifier.classify(
             {"local_path": str(video_path)}
         )
+        print(f"[RESONANCE] Predicted format={idea_format}")
+    else:
+        print("[RESONANCE] Format classifier not ready; skipping format prediction")
 
+    print("[RESONANCE] Extracting transcript (ASR if needed)")
     idea_text = extract_idea_text(video_path)
     if not idea_text:
         idea_text = " "
 
+    print("[RESONANCE] Encoding idea text")
     embedder = TextEmbedder(model_name=model_name)
     idea = encode_idea(idea_text.strip(), embedder)
 
+    print("[RESONANCE] Computing resonance")
     resonance = compute_resonance(
         idea_embedding=idea["embedding"],
         creator_embedding_payload=creator_embedding_payload,

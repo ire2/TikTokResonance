@@ -1,0 +1,93 @@
+creator_id: mickycashflow
+generated_by: Tik Tok Resonance Profiler v0.1
+status: draft
+analysis_window: last_30_videos
+observed_patterns:
+  dominant_formats:
+  - skit_or_comedy
+  underused_formats:
+  - educational
+  avg_duration_sec: 15.8
+modality_bias:
+  voice: high
+  text: medium
+visual_signals:
+  avg_face_presence_ratio: 0.562
+  avg_talking_head_confidence: 0.594
+  avg_motion_intensity: 0.095
+  avg_face_area_stability: 0.296
+  avg_face_area_ratio: 0.118
+  avg_face_area_ratio_std: 0.055
+  avg_brightness_mean: 0.473
+  avg_brightness_std: 0.039
+  avg_saturation_mean: 0.27
+  avg_color_temperature_index: -0.104
+  avg_edge_density: 0.011
+  avg_text_density_heuristic: 0.362
+  avg_text_density_ocr: 0.026
+  avg_shot_change_rate: 0.001
+  avg_camera_motion_intensity: 0.544
+  avg_camera_stability: 0.456
+  avg_object_presence_ratio: 0.992
+  avg_objects_per_frame: 1.663
+  avg_audio_energy: 0.581
+  avg_music_confidence: 0.307
+nlp_captioning_gate:
+  weight: 0.5
+  confidence: medium
+  reason: mixed visual structure
+profile_nlp:
+  dialogue_video_ratio: 1.0
+  solo_rant_ratio: 0.867
+  avg_speakers: 1.17
+  topic_profile:
+    topics:
+    - cluster: 0
+      size: 11
+      top_terms:
+      - like
+      - oh
+      - guess
+      - touch
+      - doing
+      - long
+    - cluster: 2
+      size: 6
+      top_terms:
+      - don
+      - young
+      - single
+      - remember
+      - man
+      - really
+    - cluster: 4
+      size: 6
+      top_terms:
+      - day
+      - just
+      - hey
+      - good
+      - hey hey
+      - stay
+    - cluster: 1
+      size: 3
+      top_terms:
+      - want
+      - remembered
+      - just
+      - got
+      - felt
+      - fresh
+    - cluster: 3
+      size: 3
+      top_terms:
+      - sound
+      - owl
+      - mickey
+      - young
+      - got
+      - getting
+    num_topics: 5
+    num_docs: 29
+creator_embedding: null
+human_review_required: true

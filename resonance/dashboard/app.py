@@ -178,6 +178,7 @@ def _compute_resonance_from_video():
 
     return {
         "creator_id": creator_id,
+        "model_name": model_name,
         "video_path": str(video_path),
         "idea_text": report["idea_text"],
         "resonance": report["resonance"],
@@ -233,6 +234,7 @@ def index():
         .header { display:flex; align-items:center; justify-content:space-between; gap:16px; }
         .title { font-family: "Space Grotesk", sans-serif; font-size: 30px; font-weight: 700; }
         .sub { color: var(--muted); font-size: 14px; }
+        .meta { display:flex; flex-wrap:wrap; gap:10px; margin-top:6px; }
         .grid { display:grid; grid-template-columns: 1.1fr 0.9fr; gap:16px; margin-top:16px; }
         .card {
           background: linear-gradient(180deg, var(--card) 0%, var(--card-2) 100%);
@@ -240,12 +242,21 @@ def index():
           border-radius: 16px;
           padding: 16px;
         }
+        .score {
+          font-family: "Space Grotesk", sans-serif;
+          font-size: 34px;
+          font-weight: 700;
+          margin-top: 6px;
+        }
         .pill { padding:6px 10px; border:1px solid var(--border); border-radius: 999px; color: var(--muted); font-size:12px; display:inline-flex; gap:8px; }
         .metrics { display:grid; grid-template-columns: repeat(2,1fr); gap:8px; margin-top:10px; }
         .metric { background:#0f1522; border:1px solid #26364a; border-radius:10px; padding:8px 10px; font-size:13px; color:var(--muted); }
         .suggestion { margin-top:10px; padding:10px; border:1px solid #233246; border-radius:12px; }
         .suggestion h4 { margin:0 0 6px 0; font-size:14px; }
         .evidence { font-size:13px; color: var(--muted); line-height:1.4; }
+        .evidence-item { padding:8px 10px; border:1px solid #223246; border-radius:10px; margin-top:8px; background:#0e1420; }
+        .kicker { font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:#7f91a5; }
+        .error { color:#ffb3b3; }
         @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
         button { background: linear-gradient(180deg, #21f0c9 0%, #0ec2a3 100%); border:0; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; }
       </style>
@@ -256,6 +267,7 @@ def index():
           <div>
             <div class="title">Resonance Dashboard</div>
             <div class="sub" id="subtitle">Loading...</div>
+            <div class="meta" id="meta"></div>
           </div>
           <button onclick="loadData()">Refresh</button>
         </div>
@@ -266,7 +278,9 @@ def index():
             <div class="metrics" id="metrics"></div>
           </div>
           <div class="card">
-            <div class="pill" id="score"></div>
+            <div class="kicker">Resonance Score</div>
+            <div class="score" id="score">--</div>
+            <div class="sub" id="interpretation"></div>
             <div style="margin-top:10px;">
               <div class="sub">Idea (auto‑transcribed)</div>
               <div class="evidence" id="idea"></div>
@@ -284,19 +298,35 @@ def index():
       </div>
     <script>
       let chart;
+      const fmt = (v) => (v === null || v === undefined) ? 'N/A' : Number(v).toFixed(2);
       async function loadData() {
         const res = await fetch('/api/resonance');
         const data = await res.json();
         if (data.error) {
-          document.getElementById('subtitle').innerText = data.error;
+          document.getElementById('subtitle').innerText = 'Failed to load';
+          document.getElementById('subtitle').classList.add('error');
+          document.getElementById('meta').innerHTML = `<span class="pill">Error</span>`;
           return;
         }
+        const videoName = (data.video_path || '').split('/').slice(-1)[0];
         document.getElementById('subtitle').innerText = `Creator: ${data.creator_id}`;
-        document.getElementById('score').innerText = `Resonance Score: ${data.resonance.resonance_score}`;
+        document.getElementById('meta').innerHTML = `
+          <span class="pill">Video: ${videoName || '-'}</span>
+          <span class="pill">Model: ${data.model_name || '-'}</span>
+        `;
+        document.getElementById('score').innerText = fmt(data.resonance.resonance_score);
+        const interp = data.interpretation || {};
+        document.getElementById('interpretation').innerText =
+          `Semantic fit: ${interp.semantic_fit || '-'} · Format match: ${interp.format_match || '-'}`;
         document.getElementById('idea').innerText = data.idea_text || '';
 
-        const ev = (data.evidence || []).slice(0,3).map(e => `• ${e.text}`).join('\\n');
-        document.getElementById('evidence').innerText = ev || 'No evidence available';
+        const ev = (data.evidence || []).slice(0,3).map(e => (
+          `<div class="evidence-item">
+            <div class="sub">video ${e.video_id || '-'} · similarity ${fmt(e.similarity)}</div>
+            <div>${e.text || ''}</div>
+          </div>`
+        )).join('');
+        document.getElementById('evidence').innerHTML = ev || '<div class="sub">No evidence available</div>';
 
         const sugg = (data.suggestions || []).map(s => (
           `<div class="suggestion"><h4>${s.title}</h4><div class="sub">${s.detail}</div></div>`
@@ -343,10 +373,12 @@ def index():
 
         const metrics = document.getElementById('metrics');
         metrics.innerHTML = `
-          <div class="metric">semantic_gate: ${data.resonance.semantic_gate ?? '-'}</div>
-          <div class="metric">dialogue_affinity: ${data.resonance.dialogue_affinity ?? '-'}</div>
-          <div class="metric">solo_rant_affinity: ${data.resonance.solo_rant_affinity ?? '-'}</div>
-          <div class="metric">talking_head_affinity: ${data.resonance.talking_head_affinity ?? '-'}</div>
+          <div class="metric">semantic: ${fmt(data.resonance.semantic_alignment)}</div>
+          <div class="metric">format: ${fmt(data.resonance.format_alignment)}</div>
+          <div class="metric">motion: ${fmt(data.resonance.motion_alignment)}</div>
+          <div class="metric">text density: ${fmt(data.resonance.text_density_alignment)}</div>
+          <div class="metric">dialogue affinity: ${fmt(data.resonance.dialogue_affinity)}</div>
+          <div class="metric">talking head: ${fmt(data.resonance.talking_head_affinity)}</div>
         `;
       }
       loadData();

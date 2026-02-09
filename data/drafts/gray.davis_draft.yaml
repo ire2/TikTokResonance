@@ -3,10 +3,8 @@ generated_by: Tik Tok Resonance Profiler v0.1
 status: draft
 analysis_window: last_30_videos
 observed_patterns:
-  dominant_formats:
-  - skit_or_comedy
-  underused_formats:
-  - educational
+  dominant_formats: []
+  underused_formats: []
   avg_duration_sec: 98.4
 modality_bias:
   voice: high

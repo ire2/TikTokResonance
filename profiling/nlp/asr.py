@@ -59,6 +59,26 @@ def run_asr(video_path: str, out_path: Path):
     generated.rename(out_path)
 
 
+def _has_audio_stream(video_path: str) -> bool:
+    cmd = [
+        "ffprobe",
+        "-v", "error",
+        "-select_streams", "a",
+        "-show_entries", "stream=codec_type",
+        "-of", "json",
+        video_path,
+    ]
+    try:
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+    except Exception:
+        return False
+    try:
+        payload = json.loads(result.stdout or "{}")
+        return bool(payload.get("streams"))
+    except Exception:
+        return False
+
+
 @trace
 def ensure_captions(
     creator_id: str,
@@ -84,6 +104,15 @@ def ensure_captions(
 
     # 2. ASR fallback
     try:
+        if not _has_audio_stream(video_path):
+            print(f"[ASR WARN] No audio stream for {video_id}. Writing empty captions.")
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_text(json.dumps({
+                "segments": [],
+                "no_audio": True,
+                "video_id": video_id,
+            }, indent=2))
+            return out_path
         run_asr(video_path, out_path)
         return out_path
 

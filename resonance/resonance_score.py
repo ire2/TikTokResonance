@@ -142,10 +142,9 @@ def compute_resonance(
 
     # ---- semantic gate (embedding similarity) ----
     semantic_gate = None
-    creator_vec = (
-        creator_embedding_payload.get("creator_embedding")
-        or creator_embedding_payload.get("embedding")
-    )
+    creator_vec = creator_embedding_payload.get("creator_embedding")
+    if creator_vec is None:
+        creator_vec = creator_embedding_payload.get("embedding")
     if creator_vec is not None:
         sim = float(cos_sim(idea_embedding, creator_vec)[0][0])
         semantic_gate = round(max(0.0, min(1.0, sim)), 3)

@@ -1,0 +1,91 @@
+creator_id: darbleymiller
+generated_by: Tik Tok Resonance Profiler v0.1
+status: draft
+analysis_window: last_30_videos
+observed_patterns:
+  dominant_formats: []
+  underused_formats: []
+  avg_duration_sec: 32.1
+modality_bias:
+  voice: high
+  text: high
+visual_signals:
+  avg_face_presence_ratio: 0.613
+  avg_talking_head_confidence: 0.64
+  avg_motion_intensity: 0.043
+  avg_face_area_stability: 0.409
+  avg_face_area_ratio: 0.094
+  avg_face_area_ratio_std: 0.033
+  avg_brightness_mean: 0.379
+  avg_brightness_std: 0.043
+  avg_saturation_mean: 0.276
+  avg_color_temperature_index: -0.094
+  avg_edge_density: 0.021
+  avg_text_density_heuristic: 0.316
+  avg_text_density_ocr: 0.021
+  avg_shot_change_rate: 0.001
+  avg_camera_motion_intensity: 0.224
+  avg_camera_stability: 0.776
+  avg_object_presence_ratio: 0.938
+  avg_objects_per_frame: 1.942
+  avg_audio_energy: 0.564
+  avg_music_confidence: 0.244
+nlp_captioning_gate:
+  weight: 1.0
+  confidence: high
+  reason: consistent talking-head presence
+profile_nlp:
+  dialogue_video_ratio: 0.967
+  solo_rant_ratio: 0.724
+  avg_speakers: 1.45
+  topic_profile:
+    topics:
+    - cluster: 1
+      size: 6
+      top_terms:
+      - don
+      - hit
+      - want
+      - mean
+      - just
+      - don know
+    - cluster: 3
+      size: 6
+      top_terms:
+      - really
+      - ve
+      - having
+      - week
+      - good
+      - time
+    - cluster: 4
+      size: 6
+      top_terms:
+      - like
+      - look
+      - car
+      - la
+      - people
+      - left
+    - cluster: 0
+      size: 5
+      top_terms:
+      - going
+      - did
+      - know
+      - make
+      - don
+      - baby
+    - cluster: 2
+      size: 4
+      top_terms:
+      - oh
+      - oh oh
+      - ve
+      - baby
+      - clean
+      - life
+    num_topics: 5
+    num_docs: 27
+creator_embedding: null
+human_review_required: true

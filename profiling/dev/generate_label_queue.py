@@ -2,7 +2,7 @@ from pathlib import Path
 import json
 import csv
 
-from profiling.utils.creator_config import get_active_creator
+from profiling.utils.creator_config import get_active_creator, get_training_creators
 
 
 RAW_VISUAL_DIR = Path("data/raw_visual")
@@ -102,36 +102,40 @@ def _write_rows(rows):
 
 
 def main():
-    creator_id = get_active_creator()
     raw_data = load_raw_data()
-    visual_cache = load_visual_cache(creator_id)
-
-    if not visual_cache:
-        raise ValueError(
-            f"No raw_visual cache for {creator_id}. "
-            "Run pipeline to generate it first."
-        )
+    creators = get_training_creators()
+    if not creators:
+        creators = [get_active_creator()]
 
     existing = _load_existing_labels()
     rows = []
-    videos = raw_data.get(creator_id, [])
-    video_meta = {v.get("video_id"): v for v in videos}
 
-    for video_id, signals in visual_cache.items():
-        meta = video_meta.get(video_id, {})
-        prev = existing.get((creator_id, video_id), {})
-        rows.append({
-            "creator_id": creator_id,
-            "video_id": video_id,
-            "format_label": prev.get("format_label", ""),
-            "performance_label": prev.get("performance_label", ""),
-            "tiktok_url": f"https://www.tiktok.com/@{creator_id}/video/{video_id}",
-            "views": meta.get("views"),
-            "likes": meta.get("likes"),
-            "comments": meta.get("comments"),
-            "duration_sec": meta.get("duration_sec"),
-            "posted_at": meta.get("posted_at"),
-        })
+    for creator_id in creators:
+        visual_cache = load_visual_cache(creator_id)
+        if not visual_cache:
+            print(
+                f"[WARN] No raw_visual cache for {creator_id}. Skipping."
+            )
+            continue
+
+        videos = raw_data.get(creator_id, [])
+        video_meta = {v.get("video_id"): v for v in videos}
+
+        for video_id, signals in visual_cache.items():
+            meta = video_meta.get(video_id, {})
+            prev = existing.get((creator_id, video_id), {})
+            rows.append({
+                "creator_id": creator_id,
+                "video_id": video_id,
+                "format_label": prev.get("format_label", ""),
+                "performance_label": prev.get("performance_label", ""),
+                "tiktok_url": f"https://www.tiktok.com/@{creator_id}/video/{video_id}",
+                "views": meta.get("views"),
+                "likes": meta.get("likes"),
+                "comments": meta.get("comments"),
+                "duration_sec": meta.get("duration_sec"),
+                "posted_at": meta.get("posted_at"),
+            })
 
     merged = list(existing.values())
     existing_keys = {(r.get("creator_id"), r.get("video_id")) for r in merged}
