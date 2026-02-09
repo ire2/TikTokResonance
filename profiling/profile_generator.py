@@ -24,7 +24,7 @@ def generate_profile(creator_id: str, raw_data_path: str) -> dict:
 
     embedding_meta = load_creator_embeddings(
         creator_id=creator_id,
-        model_name=get,
+        model_name=get_default_model_name(),
     )
 
     # ---- assemble profile ----
@@ -49,7 +49,7 @@ def generate_profile(creator_id: str, raw_data_path: str) -> dict:
         "nlp_captioning_gate": gate,
         "profile_nlp": nlp,
 
-        # 👇 semantic memory summary (NOT the vectors themselves)
+
         "creator_embedding": (
             {
                 "model": embedding_meta["model"],

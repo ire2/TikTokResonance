@@ -94,7 +94,8 @@ def main():
         y.append(label)
 
     if not X:
-        raise ValueError("No training samples found (missing raw_visual cache?)")
+        raise ValueError(
+            "No training samples found (missing raw_visual cache?)")
 
     le = LabelEncoder()
     y_enc = le.fit_transform(y)
@@ -120,7 +121,8 @@ def main():
 
     print(f"[OK] trained RF model → {MODEL_PATH}")
     if missing:
-        print(f"[WARN] missing {missing} labeled videos with no raw_visual cache")
+        print(
+            f"[WARN] missing {missing} labeled videos with no raw_visual cache")
 
 
 if __name__ == "__main__":

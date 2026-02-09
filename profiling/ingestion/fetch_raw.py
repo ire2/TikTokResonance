@@ -3,12 +3,27 @@ import json
 from pathlib import Path
 from typing import List, Dict, Optional
 
+import os
 from utils.trace import trace
 
 
 # Canonical location for raw videos
 RAW_VIDEO_DIR = Path("data/raw_videos")
 RAW_VIDEO_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _yt_dlp_common_args() -> List[str]:
+    args: List[str] = []
+    cookies = os.getenv("YT_DLP_COOKIES")
+    if cookies:
+        args += ["--cookies", cookies]
+    impersonate = os.getenv("YT_DLP_IMPERSONATE")
+    if impersonate:
+        args += ["--impersonate", impersonate]
+    extra = os.getenv("YT_DLP_ARGS")
+    if extra:
+        args += extra.split()
+    return args
 
 
 @trace
@@ -21,7 +36,8 @@ def fetch_metadata(
     """
 
     url = f"https://www.tiktok.com/@{creator_handle}"
-    print(f"[INGEST][{creator_handle}] Scanning metadata (limit={video_limit})")
+    print(
+        f"[INGEST][{creator_handle}] Scanning metadata (limit={video_limit})")
 
     cmd = [
         "yt-dlp",
@@ -29,7 +45,7 @@ def fetch_metadata(
         "--skip-download",
         "--playlist-end", str(video_limit),
         url,
-    ]
+    ] + _yt_dlp_common_args()
 
     process = subprocess.Popen(
         cmd,
@@ -49,6 +65,18 @@ def fetch_metadata(
                 print(f"[INGEST][{creator_handle}] metadata scanned: {count}")
         except json.JSONDecodeError:
             continue
+    stderr = process.stderr.read() if process.stderr else ""
+    returncode = process.wait()
+
+    print(f"[INGEST][{creator_handle}] metadata total: {count}")
+    if returncode != 0:
+        print(
+            f"[INGEST][{creator_handle}] yt-dlp exited with code {returncode}")
+    if count == 0 and stderr:
+        snippet = stderr.strip().splitlines()[-5:]
+        print(f"[INGEST][{creator_handle}] yt-dlp stderr (last lines):")
+        for line in snippet:
+            print(f"[INGEST][{creator_handle}] {line}")
 
     return videos
 
@@ -73,9 +101,12 @@ def fetch_captions(
         "-o", str(RAW_VIDEO_DIR / f"{creator_handle}_%(id)s.%(ext)s"),
         "--playlist-end", str(video_limit),
         url,
-    ]
+    ] + _yt_dlp_common_args()
 
-    subprocess.run(cmd, check=True)
+    result = subprocess.run(cmd)
+    if result.returncode != 0:
+        print(
+            f"[INGEST][{creator_handle}] captions download failed (exit {result.returncode})")
 
 
 @trace
@@ -101,7 +132,7 @@ def fetch_captions_for_videos(
         "--sub-lang", "en",
         "--sub-format", "vtt",
         "-o", str(RAW_VIDEO_DIR / f"{creator_handle}_%(id)s.%(ext)s"),
-    ] + urls
+    ] + _yt_dlp_common_args() + urls
 
     subprocess.run(cmd, check=True)
 
@@ -138,12 +169,12 @@ def download_missing_videos(
 
     cmd = [
         "yt-dlp",
-        "-f", "mp4",
+        "-f", "bv*+ba/best",
         "--merge-output-format", "mp4",
         "-o", str(RAW_VIDEO_DIR / f"{creator_handle}_%(id)s.%(ext)s"),
         "--playlist-end", str(video_limit),
         url,
-    ]
+    ] + _yt_dlp_common_args()
 
     subprocess.run(cmd, check=True)
 
@@ -156,6 +187,10 @@ def download_selected_videos(
     """
     Download mp4 files for specific video IDs only.
     """
+    if not videos:
+        print("[INGEST] No videos selected. Skipping download.")
+        return
+
     missing = []
 
     for v in videos:
@@ -179,10 +214,10 @@ def download_selected_videos(
 
     cmd = [
         "yt-dlp",
-        "-f", "mp4",
+        "-f", "bv*+ba/best",
         "--merge-output-format", "mp4",
         "-o", str(RAW_VIDEO_DIR / f"{creator_handle}_%(id)s.%(ext)s"),
-    ] + urls
+    ] + _yt_dlp_common_args() + urls
 
     subprocess.run(cmd, check=True)
 
@@ -260,6 +295,11 @@ def fetch_raw_videos(
         mode=selection_mode,
         limit=video_limit,
     )
+
+    if not selected:
+        print(
+            f"[INGEST][{creator_handle}] No videos found in metadata. Skipping captions/download.")
+        return []
 
     if selection_mode:
         fetch_captions_for_videos(creator_handle, selected)

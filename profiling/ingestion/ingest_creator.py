@@ -16,7 +16,8 @@ from .normalize import normalize_videos
 BASE_DIR = Path(__file__).resolve().parents[1]
 RAW_DATA_DIR = Path("data/raw_data")
 RAW_DATA_PATH = RAW_DATA_DIR / "creator_metadata.json"
-LEGACY_RAW_DATA_PATH = BASE_DIR / "metadata" / "raw_data" / "creator_metadata.json"
+LEGACY_RAW_DATA_PATH = BASE_DIR / "metadata" / \
+    "raw_data" / "creator_metadata.json"
 
 
 @trace
@@ -54,11 +55,16 @@ def ingest_creator(creator_handle: str, video_limit: int = 30):
     )
 
     existing_list = existing.get(creator_handle, [])
-    existing_ids = {v.get("video_id") for v in existing_list if v.get("video_id")}
+    existing_ids = {v.get("video_id")
+                    for v in existing_list if v.get("video_id")}
+    print(
+        f"[INGEST][{creator_handle}] existing videos: {len(existing_ids)}; fetched: {len(raw_videos)}"
+    )
     new_raw = [v for v in raw_videos if v.get("id") not in existing_ids]
 
     if not new_raw:
-        print(f"[INGEST][{creator_handle}] No new videos found. Skipping normalization.")
+        print(
+            f"[INGEST][{creator_handle}] No new videos found. Skipping normalization.")
         return existing_list
 
     normalized = normalize_videos(new_raw, creator_id=creator_handle)
@@ -76,8 +82,3 @@ def ingest_creator(creator_handle: str, video_limit: int = 30):
     RAW_DATA_PATH.write_text(json.dumps(existing, indent=2))
 
     return normalized
-
-
-if __name__ == "__main__":
-    ingest_creator("expoparker", video_limit=5)
-    print("Ingestion complete.")
