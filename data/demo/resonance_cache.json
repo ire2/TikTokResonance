@@ -1,0 +1,203 @@
+{
+  "creator_id": "expoparker",
+  "model_name": "BAAI/bge-large-en-v1.5",
+  "video_path": "data/test/video/gray.davis_7567462719171857677.mp4",
+  "idea_text": "Remember this, nobody watches you harder than the people who don't like you, so give them a show they'll never forget.",
+  "resonance": {
+    "semantic_alignment": 0.4343,
+    "dialogue_affinity": 1.0,
+    "solo_rant_affinity": 0.5,
+    "talking_head_affinity": 0.758,
+    "motion_alignment": 0.966,
+    "text_density_alignment": 0.988,
+    "format_alignment": 1.0,
+    "semantic_gate": 0.596,
+    "resonance_score": 0.3532
+  },
+  "interpretation": {
+    "semantic_fit": "medium",
+    "format_match": "strong"
+  },
+  "evidence": [
+    {
+      "video_id": "7562648709859790111",
+      "text": "Big chair, huh? Yeah. Must have a pretty big dick to sit in the chair that big. What the fuck?",
+      "similarity": 0.3885,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7562648709859790111"
+    },
+    {
+      "video_id": "7564505296740158750",
+      "text": "Because I'm a liberal, a miracle, a realtor. Fuck! That's just off top, though. That's just off top. Uh, I gotta go. Uh, here. Take my music card. It's an Uno card. Yeah, it's my rap name. Uno. Number one. Oh, fuck.",
+      "similarity": 0.4534,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7564505296740158750"
+    },
+    {
+      "video_id": "7565246942440082719",
+      "text": "Boop!",
+      "similarity": 0.4081,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7565246942440082719"
+    },
+    {
+      "video_id": "7566358690270432543",
+      "text": "You help finding a pumpkin? Not really. I'll just be here then. All right. I'm saying I could be your pumpkin in relationships in relationships that girlfriend calls the boyfriend of pumpkin and a boyfriend of girl.",
+      "similarity": 0.4457,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7566358690270432543"
+    },
+    {
+      "video_id": "7567105328811232543",
+      "text": "Golden hour, huh? Yeah, I'm golden shower too, okay, actually can you scoot a little I can't get out.",
+      "similarity": 0.4159,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7567105328811232543"
+    },
+    {
+      "video_id": "7568229619833392415",
+      "text": "Your outfit looks really good today. Thanks. Your outfit looks really good today. What would it look like off? Did you really write that on? I have another one. What does your bottle look like?",
+      "similarity": 0.4437,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7568229619833392415"
+    },
+    {
+      "video_id": "7568971876928671007",
+      "text": "Yeah, I've been thinking we should go our separate ways, honestly. Aren't they sick? Your boyfriend gets cool stuff. Mmm. Oh, you got a tummy ache? No. I get it. Don't worry, I'll let you borrow him. Look, they come with the super cool app. If you just press record, live recording. Remind me to get flowers for my awesome girlfriend because I'm an awesome boyfriend and to clean the cat's litter box because it smells like poop. Look, it just gave me a summary of everything that I just said. A to-do list of everything that I just said. And even a mind map. Isn't that wicked? Look at my favorite part. Try and call me right now. There you are. Answer.",
+      "similarity": 0.5,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7568971876928671007"
+    },
+    {
+      "video_id": "7569343487254990110",
+      "text": "What does this guy want? Okay, I just want to say that if we were together, I would funnel none on November so fast. Okay. Well, you're gonna be fine Because that's not gonna happen. Please. No. She's killing me",
+      "similarity": 0.4499,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7569343487254990110"
+    },
+    {
+      "video_id": "7572353004465114399",
+      "text": "This has been a good conversation that we've had we haven't even had a conversation you just started laughing",
+      "similarity": 0.4332,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7572353004465114399"
+    },
+    {
+      "video_id": "7573425565198290206",
+      "text": "This is bullshit. You have no idea where the remote is. No, I don't. Check in that cushion. Already dead!",
+      "similarity": 0.4802,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7573425565198290206"
+    },
+    {
+      "video_id": "7573795864930454815",
+      "text": "My parents met through a joke and they've been happily ever after since.",
+      "similarity": 0.437,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7573795864930454815"
+    },
+    {
+      "video_id": "7574541672311295263",
+      "text": "Well, okay. Aren't you understanding how terrifying that, I mean, I would suck if that were happening to me tonight. Um, I'm gonna go. Don't. I mean, how could you see without the light? No, don't even think about.",
+      "similarity": 0.4756,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7574541672311295263"
+    },
+    {
+      "video_id": "7574567368626556174",
+      "text": "You're weird. I'm weird. Stop holding it.",
+      "similarity": 0.4748,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7574567368626556174"
+    },
+    {
+      "video_id": "7576023260568014111",
+      "text": "OK, I just don't understand why you're so mad. You're being like a Karen. You're dinged on ditching people's houses in the middle of the day. It's called having fun. How old are you? You didn't ask the rest of them that question? They look 10. You look 40. Really nice. It's a 30s and a new 40s.",
+      "similarity": 0.4874,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7576023260568014111"
+    },
+    {
+      "video_id": "7579366886232689951",
+      "text": "You ladies want an honest man until you guys always ask for an honest man and when he's honest, you don't want an honest man. You're afraid.",
+      "similarity": 0.5005,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7579366886232689951"
+    },
+    {
+      "video_id": "7581959635217829151",
+      "text": "Oh, yeah, there may be some dogs who are in there.",
+      "similarity": 0.3842,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7581959635217829151"
+    },
+    {
+      "video_id": "7582702746655132959",
+      "text": "Do you wanna do it? Do you wanna do it? Oh good. Arararararar. What the fuck?",
+      "similarity": 0.3842,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7582702746655132959"
+    },
+    {
+      "video_id": "7584558581375159583",
+      "text": "Oh my god, don't move. Is this like a good look, Trump? I think so. Good look, Trump.",
+      "similarity": 0.4911,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7584558581375159583"
+    },
+    {
+      "video_id": "7586043016561904927",
+      "text": "Oh, you're starting? Yes. Did you already start the video? Yes, I did. Oh. I've been seeing the edits that you guys have been making of me. Not good at all. So here's some new material. Just a smile, look, take, keep happy, like hurting my fucking eyes. Okay. Okay, that's just creepy. What? I didn't hear you. Wait, what? That's creepy. Who did that? I did. I just don't want to run around. There's a lot of deer droppings around here. It's got my socks wet. Okay. This is an awful video idea. Not a lot of light in this dark world. I don't know. I thought it quote would go good. All right. You're weird. Okay. I don't want to be out here anymore.",
+      "similarity": 0.5136,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7586043016561904927"
+    },
+    {
+      "video_id": "7588270696753581342",
+      "text": "Oh, a cute cat. Thanks. You've seen my pussy. Let's see yours. Really? Come on. So weird. Oh my god.",
+      "similarity": 0.4218,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7588270696753581342"
+    },
+    {
+      "video_id": "7588641198701579550",
+      "text": "Good luck, good luck, good luck. Big jazz mother fucker. Wow. Sorry, sorry. Sorry. I'm just trying to do this tough guy thing. It's a brand new thing. Okay, first back the fuck off. Roger that. Second, I don't see how fake shooting me is a tough guy thing. Because I'm a crazy mother. Alright. 40% on that section I do in my bed. Okay. Keep it up.",
+      "similarity": 0.5273,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7588641198701579550"
+    },
+    {
+      "video_id": "7591608861254028574",
+      "text": "Yup. That prank, sorry. There's actually no tree. Just go have a nice day.",
+      "similarity": 0.4244,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7591608861254028574"
+    },
+    {
+      "video_id": "7592351729753066782",
+      "text": "Aren't you going to ask me why I have a cupcake? Oh, why do you have a cupcake? Just hit 1 million followers. Oh, that's cool. Can I get a kiss? Um, sure. What? Sure. Actually? Yeah. Wait, I feel like I'm going to say something weird. Just don't. I can't help myself. I feel like I'm going to say something weird. My peeps are so long I twist them into spikes. Just like my hair. Oh, my god.",
+      "similarity": 0.4696,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7592351729753066782"
+    },
+    {
+      "video_id": "7593464124441414943",
+      "text": "Oscar, let's go. She doesn't want to pet us. I thought it wasn't your cat. No one owns us.",
+      "similarity": 0.4367,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7593464124441414943"
+    },
+    {
+      "video_id": "7594577627495664927",
+      "text": "Oh my god. Really? Clean up on my outline. I usually love playing this one.",
+      "similarity": 0.443,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7594577627495664927"
+    },
+    {
+      "video_id": "7595320060298792222",
+      "text": "What is this? Yes? Hi. Is this going anywhere? How good, thanks. Okay. Thanks. All right. Bye.",
+      "similarity": 0.3858,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7595320060298792222"
+    },
+    {
+      "video_id": "7596807557923097886",
+      "text": "I'm starting to picture my life here. Yeah, I see it now. Okay, great You me um the kids I'm sorry. I'm just your realtor. I don't Know you're more than that. Okay",
+      "similarity": 0.369,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7596807557923097886"
+    },
+    {
+      "video_id": "7600147911158058270",
+      "text": "Come on, let's go look at basketball. Dude, stop. Let's go look at basketball. You know what the fuck it was, so play basketball. Okay. Sorry.",
+      "similarity": 0.4431,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7600147911158058270"
+    },
+    {
+      "video_id": "7600516094272507167",
+      "text": "Never have I ever want to shout with the homies What the fuck dude Dude look away Dude stop looking at me dude",
+      "similarity": 0.5298,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7600516094272507167"
+    },
+    {
+      "video_id": "7603856828170128671",
+      "text": "I don't really want you in the picture. What? Oh, sorry. My name's Parker. I was just laughing. It's my name on that. Oh. Is it your restaurant? No. I'm just visiting. Oh. Okay. I still don't want you in there. Oh. I was just saying it's still cool. Just so you could give a little bit more. Okay. Flip. Nope. Wrong way. Okay. Now just go over here. No. Oh my god.",
+      "similarity": 0.5247,
+      "tiktok_url": "https://www.tiktok.com/@expoparker/video/7603856828170128671"
+    }
+  ]
+}

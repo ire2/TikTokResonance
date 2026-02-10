@@ -1,23 +1,23 @@
-# TikTok Resonance 
+# TikTokResonance
 
-This repository is a **creator resonance project** for evaluating whether an idea or draft video will fit (and potentially perform for) a specific creator.  
-It combines **CV signals**, **NLP signals**, and **semantic embeddings** into a single scoring pipeline.
+A creator profiling and fit‑scoring pipeline. It ingests creator videos, extracts CV + NLP signals, builds embeddings, and produces a resonance score for any test video or idea.
 
 ---
 
-## What It Does
+## Highlights
 
-- Ingests creator metadata and videos
-- Builds creator profiles (CV + NLP + metadata)
-- Trains a format classifier from labeled videos
-- Runs resonance on a **test video** or **idea text**
+- Multi‑modal pipeline (CV, OCR, audio, NLP)
+- Creator profiles with structured signals and evidence
+- Resonance scoring with explainable drivers
+- Human‑in‑the‑loop labeling for a format classifier
+- Dashboard for fit visualization
 
 ---
 
 ## Quick Start
 
 ### 1) Configure creators
-Edit root `config.yaml`:
+Edit `config.yaml`:
 
 ```yaml
 active_creator: expoparker
@@ -34,30 +34,27 @@ defaults:
   selection_metric: views
 ```
 
-### 2) Run the pipeline (profiles + embeddings)
+### 2) Run the pipeline
 ```bash
-python -m pipeline.run_main
+make run
 ```
 
-### 3) Label videos (optional, for training)
+### 3) Label videos (optional)
 ```bash
 make labels
 make ui
 ```
 
-### 4) Train format classifier
+### 4) Train the classifier
 ```bash
 make train
 ```
 
-### 5) Run resonance on a test video
-Put a test video in:
-```
-profiling/test/video
-```
-Then:
+### 5) Run resonance + dashboard
 ```bash
+make random
 make resonance
+make dashboard
 ```
 
 ---
@@ -65,20 +62,21 @@ make resonance
 ## Makefile Shortcuts
 
 ```
-make run           # full pipeline
-make run-skip      # skip profiling + embeddings
-make labels        # generate label queue
-make ui            # launch label UI
-make train         # train format classifier
-make resonance     # run resonance on test video
-make random        # pick random test video
+make env            # open a shell with conda env activated
+make run            # full pipeline (profiles + embeddings)
+make run-skip       # skip profiling + embeddings
+make labels         # generate label queue for all creators
+make ui             # launch label UI
+make train          # train format classifier
+make random         # pick a random test video
+make resonance      # run resonance + write cache
+make dashboard      # live dashboard (recompute)
+make dashboard-demo # dashboard from cached results
 ```
 
 ---
 
 ## Data Layout
-
-All runtime artifacts live in `data/`:
 
 ```
 data/
@@ -89,6 +87,7 @@ data/
   embeddings_store/
   labels/
   drafts/
+  demo/             # cached resonance output
 ```
 
 ---
@@ -96,12 +95,12 @@ data/
 ## Resonance Scoring
 
 Resonance combines:
-- **Semantic alignment** (idea ↔ creator embeddings)
-- **Format alignment** (idea format ↔ creator dominant formats)
-- **CV alignment** (motion, text density, etc.)
-- **Semantic gate** (embedding similarity)
+- Semantic alignment (idea ↔ creator embeddings)
+- Format alignment (idea format ↔ creator dominant formats)
+- Visual alignment (motion, text density)
+- A semantic gate to reduce false positives
 
-Output example:
+Key outputs:
 ```
 semantic_alignment
 format_alignment
@@ -114,8 +113,8 @@ resonance_score
 
 ## Notes
 
-- OCR/YOLO/audio are expensive. Use `FAST_VISUAL=true` for iteration.
-- If you want full quality CV signals, run once with:
+- CV signals are cached in `data/raw_visual` for fast iteration.
+- For full‑quality CV runs:
   ```
   FAST_VISUAL=false FORCE_PROFILES=true
   ```
@@ -124,7 +123,6 @@ resonance_score
 
 ## Status
 
-- Working end‑to‑end pipeline
-- Multi‑creator ingestion
-- Video‑based resonance testing
----
+- End‑to‑end pipeline working
+- Multi‑creator ingestion and profiling
+- Dashboard with evidence links and suggestions

@@ -1,4 +1,6 @@
 from pathlib import Path
+import json
+import os
 import yaml
 
 from profiling.embedding.embedder import TextEmbedder
@@ -121,6 +123,28 @@ def main():
         resonance=resonance,
     )
 
+    if os.getenv("RESONANCE_WRITE_CACHE", "false").lower() == "true":
+        cache_path = Path(os.getenv(
+            "RESONANCE_CACHE_PATH", "data/demo/resonance_cache.json"
+        ))
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        evidence = report.get("top_similar_moments", [])
+        for e in evidence:
+            vid = e.get("video_id")
+            if vid:
+                e["tiktok_url"] = f"https://www.tiktok.com/@{creator_id}/video/{vid}"
+        payload = {
+            "creator_id": creator_id,
+            "model_name": model_name,
+            "video_path": str(video_path),
+            "idea_text": report["idea_text"],
+            "resonance": report["resonance"],
+            "interpretation": report["interpretation"],
+            "evidence": evidence,
+        }
+        cache_path.write_text(json.dumps(payload, indent=2))
+        print(f"[RESONANCE] Cached results → {cache_path}")
+
     print("\n========== IDEA ==========")
     print((report["idea_text"] or "").strip()[:1000])
 
@@ -131,6 +155,17 @@ def main():
     print("\n=== INTERPRETATION ===")
     for k, v in report["interpretation"].items():
         print(f"{k:>25}: {v}")
+
+    print("\n=== TOP EVIDENCE ===")
+    evidence = report.get("top_similar_moments", [])
+    if not evidence:
+        print("No evidence available.")
+    else:
+        for e in evidence[:5]:
+            vid = e.get("video_id", "-")
+            sim = e.get("similarity", "-")
+            text = (e.get("text") or "").strip()
+            print(f"[{vid}] sim={sim} :: {text[:200]}")
 
     print("\n[RESONANCE VIDEO] Done\n")
 

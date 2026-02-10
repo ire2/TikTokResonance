@@ -165,8 +165,8 @@ def compute_resonance(
             0.45 * semantic_alignment
             + 0.18 * dialogue_affinity
             + 0.12 * (1 - solo_rant_affinity)
-            + 0.10 * fmt
-            + 0.08 * txt
+            + 0.05 * fmt
+            + 0.04 * txt
             + 0.07 * mot,
             4,
         )

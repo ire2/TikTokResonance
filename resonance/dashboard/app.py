@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import json
 import yaml
 
@@ -21,7 +22,11 @@ from profiling.nlp.transcript_loader import load_transcript
 TEST_VIDEO_DIR = Path("data/test/video")
 RAW_VISUAL_PATH = Path("data/raw_visual")
 DRAFTS_DIR = Path("data/drafts")
+CACHE_PATH = Path(os.getenv("RESONANCE_CACHE_PATH", "data/demo/resonance_cache.json"))
+DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
 
+os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
+os.environ.setdefault("TRANSFORMERS_NO_ADVISORY_WARNINGS", "1")
 app = FastAPI()
 silence_common_warnings()
 
@@ -119,6 +124,17 @@ def _suggestions(resonance: dict, creator_profile: dict, idea_visual: dict) -> l
 
 
 def _compute_resonance_from_video():
+    if DEMO_MODE:
+        if not CACHE_PATH.exists():
+            raise FileNotFoundError(f"Demo cache not found: {CACHE_PATH}")
+        payload = json.loads(CACHE_PATH.read_text())
+        creator_id = payload.get("creator_id")
+        if creator_id:
+            for e in payload.get("evidence", []):
+                if e.get("video_id") and not e.get("tiktok_url"):
+                    e["tiktok_url"] = f"https://www.tiktok.com/@{creator_id}/video/{e['video_id']}"
+        return payload
+
     creator_id = get_active_creator()
     model_name = get_default_model_name()
     video_path = _find_latest_video()
@@ -176,6 +192,12 @@ def _compute_resonance_from_video():
         resonance=resonance,
     )
 
+    evidence = report.get("top_similar_moments", [])
+    for e in evidence:
+        vid = e.get("video_id")
+        if vid:
+            e["tiktok_url"] = f"https://www.tiktok.com/@{creator_id}/video/{vid}"
+
     return {
         "creator_id": creator_id,
         "model_name": model_name,
@@ -183,7 +205,7 @@ def _compute_resonance_from_video():
         "idea_text": report["idea_text"],
         "resonance": report["resonance"],
         "interpretation": report["interpretation"],
-        "evidence": report.get("top_similar_moments", []),
+        "evidence": evidence,
         "suggestions": _suggestions(resonance, creator_profile, idea_visual),
     }
 
@@ -248,6 +270,10 @@ def index():
           font-weight: 700;
           margin-top: 6px;
         }
+        .score-bar { height: 10px; background:#0f1522; border-radius:999px; border:1px solid #233246; overflow:hidden; margin-top:8px; }
+        .score-bar > div { height:100%; background: linear-gradient(90deg, #21f0c9 0%, #6ee7ff 100%); width:0%; transition: width 0.6s ease; }
+        .badges { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+        .badge { padding:6px 10px; border:1px solid #223246; border-radius:999px; font-size:12px; color:var(--muted); background:#0e1420; }
         .pill { padding:6px 10px; border:1px solid var(--border); border-radius: 999px; color: var(--muted); font-size:12px; display:inline-flex; gap:8px; }
         .metrics { display:grid; grid-template-columns: repeat(2,1fr); gap:8px; margin-top:10px; }
         .metric { background:#0f1522; border:1px solid #26364a; border-radius:10px; padding:8px 10px; font-size:13px; color:var(--muted); }
@@ -255,6 +281,8 @@ def index():
         .suggestion h4 { margin:0 0 6px 0; font-size:14px; }
         .evidence { font-size:13px; color: var(--muted); line-height:1.4; }
         .evidence-item { padding:8px 10px; border:1px solid #223246; border-radius:10px; margin-top:8px; background:#0e1420; }
+        .evidence-item a { color: #6ee7ff; text-decoration: none; font-size: 12px; }
+        .evidence-item a:hover { text-decoration: underline; }
         .kicker { font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:#7f91a5; }
         .error { color:#ffb3b3; }
         @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
@@ -280,7 +308,9 @@ def index():
           <div class="card">
             <div class="kicker">Resonance Score</div>
             <div class="score" id="score">--</div>
+            <div class="score-bar"><div id="scoreBar"></div></div>
             <div class="sub" id="interpretation"></div>
+            <div class="badges" id="badges"></div>
             <div style="margin-top:10px;">
               <div class="sub">Idea (auto‑transcribed)</div>
               <div class="evidence" id="idea"></div>
@@ -299,6 +329,21 @@ def index():
     <script>
       let chart;
       const fmt = (v) => (v === null || v === undefined) ? 'N/A' : Number(v).toFixed(2);
+      const CENSOR_WORDS = [
+        'fuck', 'fucking', 'fucked', 'fucker',
+        'shit', 'bullshit', 'bitch', 'asshole',
+        'dick', 'pussy', 'cunt', 'bastard',
+        'slut', 'whore', 'damn', 'mf'
+      ];
+      function censor(text) {
+        if (!text) return '';
+        let out = text;
+        for (const w of CENSOR_WORDS) {
+          const re = new RegExp(`\\b${w}\\b`, 'gi');
+          out = out.replace(re, (m) => m[0] + '*'.repeat(Math.max(0, m.length - 1)));
+        }
+        return out;
+      }
       async function loadData() {
         const res = await fetch('/api/resonance');
         const data = await res.json();
@@ -318,12 +363,21 @@ def index():
         const interp = data.interpretation || {};
         document.getElementById('interpretation').innerText =
           `Semantic fit: ${interp.semantic_fit || '-'} · Format match: ${interp.format_match || '-'}`;
-        document.getElementById('idea').innerText = data.idea_text || '';
+        const scorePct = Math.max(0, Math.min(1, data.resonance.resonance_score || 0)) * 100;
+        document.getElementById('scoreBar').style.width = `${scorePct.toFixed(1)}%`;
+        document.getElementById('badges').innerHTML = `
+          <div class="badge">semantic ${fmt(data.resonance.semantic_alignment)}</div>
+          <div class="badge">format ${fmt(data.resonance.format_alignment)}</div>
+          <div class="badge">motion ${fmt(data.resonance.motion_alignment)}</div>
+          <div class="badge">text ${fmt(data.resonance.text_density_alignment)}</div>
+        `;
+        document.getElementById('idea').innerText = censor(data.idea_text || '');
 
         const ev = (data.evidence || []).slice(0,3).map(e => (
           `<div class="evidence-item">
             <div class="sub">video ${e.video_id || '-'} · similarity ${fmt(e.similarity)}</div>
-            <div>${e.text || ''}</div>
+            <div>${censor(e.text || '')}</div>
+            ${e.tiktok_url ? `<div><a href="${e.tiktok_url}" target="_blank" rel="noopener">Open video</a></div>` : ''}
           </div>`
         )).join('');
         document.getElementById('evidence').innerHTML = ev || '<div class="sub">No evidence available</div>';
