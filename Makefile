@@ -1,4 +1,4 @@
-.PHONY: run run-skip labels ui train resonance random dashboard dashboard-demo demo-reset env
+.PHONY: run run-skip labels ui train resonance random dashboard dashboard-demo demo-reset market-index artifact-manifest artifact-summary clean-media-dry-run clean-media env
 
 env:
 	@bash -lc 'source scripts/activate_env.sh && exec $$SHELL -l'
@@ -15,6 +15,11 @@ ui: ; uvicorn profiling.label_ui.app:app --reload
 dashboard: ; uvicorn resonance.dashboard.app:app --reload
 dashboard-demo: ; DEMO_MODE=true RESONANCE_CACHE_PATH=data/demo/resonance_cache.json uvicorn resonance.dashboard.app:app --reload
 demo-reset: ; python -m scripts.demo_reset
+market-index: ; python -m scripts.build_market_index
+artifact-manifest: ; python -m scripts.build_artifact_manifest
+artifact-summary: market-index artifact-manifest
+clean-media-dry-run: ; python -m scripts.clean_media
+clean-media: ; python -m scripts.clean_media --apply
 
 train: ; RUN_TRAIN=true RUN_PROFILES=false BUILD_EMBEDDINGS=false python -m pipeline.run_main
 

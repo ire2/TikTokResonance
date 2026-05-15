@@ -1,0 +1,62 @@
+# Example artifact-factory batch config.
+# This file is documentation plus a future schema target; the full batch runner is TODO.
+
+output_artifact_pack: data/artifact_packs/market_artifacts.zip
+max_videos_per_creator: 30
+
+defaults:
+  run_asr: true
+  run_cv: false
+  build_embeddings: true
+  export_reviews: false
+  delete_raw_media_after_export: true
+
+creators:
+  - creator_id: expoparker
+    tier: deep_style
+    max_videos: 30
+    run_asr: true
+    run_cv: true
+    build_embeddings: true
+
+  - creator_id: cleoabram
+    tier: deep_style
+    max_videos: 30
+    run_asr: true
+    run_cv: true
+    build_embeddings: true
+
+  - creator_id: example_new_creator
+    tier: semantic
+    max_videos: 50
+    run_asr: true
+    run_cv: false
+    build_embeddings: true
+
+  - creator_id: broad_market_seed
+    tier: metadata_only
+    max_videos: 100
+    run_asr: false
+    run_cv: false
+    build_embeddings: false
+
+tiers:
+  metadata_only:
+    goal: "Breadth: video metadata and rough engagement distribution."
+    durable_outputs:
+      - data/raw_data/creator_metadata.json
+
+  semantic:
+    goal: "Caption and segment memory for idea review without expensive CV."
+    durable_outputs:
+      - data/raw_captions/
+      - data/embeddings_store/
+
+  deep_style:
+    goal: "Full local style memory for selected creators."
+    durable_outputs:
+      - data/raw_captions/
+      - data/raw_visual/
+      - data/embeddings_store/
+      - data/drafts/
+      - data/labels/

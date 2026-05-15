@@ -1,0 +1,441 @@
+{
+  "creators": [
+    {
+      "confidence_level": "high",
+      "coverage_tier": "deep_style_ready",
+      "creator_embedding_exists": true,
+      "creator_id": "cleoabram",
+      "dominant_formats": [
+        "educational"
+      ],
+      "engagement_proxies": {
+        "median_like_comment_rate": 0.1016,
+        "videos_with_engagement": 30
+      },
+      "hit_ok_miss_distribution": {
+        "hit": 7,
+        "miss": 17,
+        "ok": 6
+      },
+      "label_source": "human",
+      "label_source_counts": {
+        "human": 30
+      },
+      "median_views": 508050.0,
+      "metadata_video_count": 30,
+      "recommended_next_processing_step": "ready_for_idea_review",
+      "top_topics": [
+        "water, light, moon",
+        "dna, ice, life",
+        "asteroid, earth, hit",
+        "light, planet, years",
+        "plane, wings, zero"
+      ],
+      "video_count": 30,
+      "videos_with_captions": 30,
+      "videos_with_embeddings": 30,
+      "videos_with_labels": 30,
+      "videos_with_visual_artifacts": 30
+    },
+    {
+      "confidence_level": "high",
+      "coverage_tier": "deep_style_ready",
+      "creator_embedding_exists": true,
+      "creator_id": "darbleymiller",
+      "dominant_formats": [
+        "skit_or_comedy",
+        "dance",
+        "voiceover",
+        "other",
+        "product_or_ad"
+      ],
+      "engagement_proxies": {
+        "median_like_comment_rate": 0.0731,
+        "videos_with_engagement": 30
+      },
+      "hit_ok_miss_distribution": {
+        "hit": 8,
+        "miss": 19,
+        "ok": 3
+      },
+      "label_source": "human",
+      "label_source_counts": {
+        "human": 30
+      },
+      "median_views": 13500.0,
+      "metadata_video_count": 30,
+      "recommended_next_processing_step": "build_embeddings",
+      "top_topics": [
+        "don, hit, want",
+        "really, ve, having",
+        "like, look, car",
+        "going, did, know",
+        "oh, oh oh, ve"
+      ],
+      "video_count": 30,
+      "videos_with_captions": 30,
+      "videos_with_embeddings": 29,
+      "videos_with_labels": 30,
+      "videos_with_visual_artifacts": 30
+    },
+    {
+      "confidence_level": "high",
+      "coverage_tier": "deep_style_ready",
+      "creator_embedding_exists": true,
+      "creator_id": "expoparker",
+      "dominant_formats": [
+        "skit_or_comedy"
+      ],
+      "engagement_proxies": {
+        "median_like_comment_rate": 0.1325,
+        "videos_with_engagement": 30
+      },
+      "hit_ok_miss_distribution": {
+        "hit": 15,
+        "miss": 9,
+        "ok": 6
+      },
+      "label_source": "human",
+      "label_source_counts": {
+        "human": 30
+      },
+      "median_views": 3043950.0,
+      "metadata_video_count": 30,
+      "recommended_next_processing_step": "ready_for_idea_review",
+      "top_topics": [
+        "okay, just, don",
+        "yeah, oh, good",
+        "look, nice, just",
+        "thanks, cat, weird",
+        "ve, conversation, laughing"
+      ],
+      "video_count": 30,
+      "videos_with_captions": 30,
+      "videos_with_embeddings": 30,
+      "videos_with_labels": 30,
+      "videos_with_visual_artifacts": 30
+    },
+    {
+      "confidence_level": "high",
+      "coverage_tier": "deep_style_ready",
+      "creator_embedding_exists": true,
+      "creator_id": "gray.davis",
+      "dominant_formats": [
+        "food_or_cooking",
+        "tutorial_or_demo",
+        "educational"
+      ],
+      "engagement_proxies": {
+        "median_like_comment_rate": 0.0926,
+        "videos_with_engagement": 30
+      },
+      "hit_ok_miss_distribution": {
+        "hit": 8,
+        "miss": 14,
+        "ok": 8
+      },
+      "label_source": "human",
+      "label_source_counts": {
+        "human": 30
+      },
+      "median_views": 318400.0,
+      "metadata_video_count": 30,
+      "recommended_next_processing_step": "build_embeddings",
+      "top_topics": [
+        "better, know, coffee",
+        "cold, trees, iguanas",
+        "coconut, cinnamon, sugar",
+        "fruit, came, tree",
+        "stone, crab, stone crab"
+      ],
+      "video_count": 30,
+      "videos_with_captions": 30,
+      "videos_with_embeddings": 29,
+      "videos_with_labels": 30,
+      "videos_with_visual_artifacts": 30
+    },
+    {
+      "confidence_level": "high",
+      "coverage_tier": "deep_style_ready",
+      "creator_embedding_exists": true,
+      "creator_id": "mickycashflow",
+      "dominant_formats": [
+        "talking_head",
+        "text_heavy",
+        "product_or_ad",
+        "dance",
+        "skit_or_comedy"
+      ],
+      "engagement_proxies": {
+        "median_like_comment_rate": 0.1959,
+        "videos_with_engagement": 30
+      },
+      "hit_ok_miss_distribution": {
+        "hit": 17,
+        "miss": 5,
+        "ok": 8
+      },
+      "label_source": "human",
+      "label_source_counts": {
+        "human": 30
+      },
+      "median_views": 730600.0,
+      "metadata_video_count": 30,
+      "recommended_next_processing_step": "ready_for_idea_review",
+      "top_topics": [
+        "like, oh, guess",
+        "don, young, single",
+        "day, just, hey",
+        "want, remembered, just",
+        "sound, owl, mickey"
+      ],
+      "video_count": 30,
+      "videos_with_captions": 30,
+      "videos_with_embeddings": 30,
+      "videos_with_labels": 30,
+      "videos_with_visual_artifacts": 30
+    },
+    {
+      "confidence_level": "high",
+      "coverage_tier": "deep_style_ready",
+      "creator_embedding_exists": true,
+      "creator_id": "natsingssongs",
+      "dominant_formats": [
+        "skit_or_comedy",
+        "product_or_ad"
+      ],
+      "engagement_proxies": {
+        "median_like_comment_rate": 0.0628,
+        "videos_with_engagement": 30
+      },
+      "hit_ok_miss_distribution": {
+        "hit": 9,
+        "miss": 19,
+        "ok": 2
+      },
+      "label_source": "human",
+      "label_source_counts": {
+        "human": 30
+      },
+      "median_views": 329400.0,
+      "metadata_video_count": 30,
+      "recommended_next_processing_step": "ready_for_idea_review",
+      "top_topics": [
+        "love, queen, did",
+        "got, just, ve got",
+        "ll, don, man",
+        "time, having, let",
+        "killed, plant, kids"
+      ],
+      "video_count": 30,
+      "videos_with_captions": 30,
+      "videos_with_embeddings": 30,
+      "videos_with_labels": 30,
+      "videos_with_visual_artifacts": 30
+    },
+    {
+      "confidence_level": "high",
+      "coverage_tier": "deep_style_ready",
+      "creator_embedding_exists": true,
+      "creator_id": "puderschmude",
+      "dominant_formats": [
+        "skit_or_comedy",
+        "talking_head",
+        "product_or_ad"
+      ],
+      "engagement_proxies": {
+        "median_like_comment_rate": 0.1751,
+        "videos_with_engagement": 30
+      },
+      "hit_ok_miss_distribution": {
+        "hit": 5,
+        "miss": 19,
+        "ok": 6
+      },
+      "label_source": "human",
+      "label_source_counts": {
+        "human": 30
+      },
+      "median_views": 16771.5,
+      "metadata_video_count": 30,
+      "recommended_next_processing_step": "ready_for_idea_review",
+      "top_topics": [
+        "want, like, don",
+        "got, gay, mood",
+        "love, gonna, food",
+        "right, ll, ve",
+        "know, look, wasn"
+      ],
+      "video_count": 30,
+      "videos_with_captions": 30,
+      "videos_with_embeddings": 30,
+      "videos_with_labels": 30,
+      "videos_with_visual_artifacts": 30
+    }
+  ],
+  "data_dir": "data",
+  "schema_version": "market_index.v1",
+  "summary": {
+    "creators_by_coverage_tier": {
+      "deep_style_ready": 7
+    },
+    "creators_needing_captions": [],
+    "creators_needing_labels": [],
+    "creators_needing_visual_processing": [],
+    "creators_ready_for_idea_review": [
+      "cleoabram",
+      "expoparker",
+      "mickycashflow",
+      "natsingssongs",
+      "puderschmude"
+    ],
+    "formats_by_hit_rate": [
+      {
+        "format": "unknown",
+        "hit_count": 4,
+        "hit_rate": 1.0,
+        "labeled_count": 4,
+        "miss_count": 0,
+        "ok_count": 0
+      },
+      {
+        "format": "text_heavy",
+        "hit_count": 2,
+        "hit_rate": 0.6667,
+        "labeled_count": 3,
+        "miss_count": 0,
+        "ok_count": 1
+      },
+      {
+        "format": "talking_head",
+        "hit_count": 14,
+        "hit_rate": 0.4667,
+        "labeled_count": 30,
+        "miss_count": 10,
+        "ok_count": 6
+      },
+      {
+        "format": "skit_or_comedy",
+        "hit_count": 34,
+        "hit_rate": 0.3778,
+        "labeled_count": 90,
+        "miss_count": 42,
+        "ok_count": 14
+      },
+      {
+        "format": "food_or_cooking",
+        "hit_count": 7,
+        "hit_rate": 0.28,
+        "labeled_count": 25,
+        "miss_count": 11,
+        "ok_count": 7
+      },
+      {
+        "format": "dance",
+        "hit_count": 3,
+        "hit_rate": 0.2727,
+        "labeled_count": 11,
+        "miss_count": 7,
+        "ok_count": 1
+      },
+      {
+        "format": "educational",
+        "hit_count": 5,
+        "hit_rate": 0.1724,
+        "labeled_count": 29,
+        "miss_count": 17,
+        "ok_count": 7
+      },
+      {
+        "format": "product_or_ad",
+        "hit_count": 0,
+        "hit_rate": 0.0,
+        "labeled_count": 9,
+        "miss_count": 8,
+        "ok_count": 1
+      },
+      {
+        "format": "tutorial_or_demo",
+        "hit_count": 0,
+        "hit_rate": 0.0,
+        "labeled_count": 4,
+        "miss_count": 3,
+        "ok_count": 1
+      },
+      {
+        "format": "voiceover",
+        "hit_count": 0,
+        "hit_rate": 0.0,
+        "labeled_count": 3,
+        "miss_count": 2,
+        "ok_count": 1
+      }
+    ],
+    "recommended_processing_queue": [
+      {
+        "coverage_tier": "deep_style_ready",
+        "creator_id": "darbleymiller",
+        "next_step": "build_embeddings"
+      },
+      {
+        "coverage_tier": "deep_style_ready",
+        "creator_id": "gray.davis",
+        "next_step": "build_embeddings"
+      }
+    ],
+    "topics_by_coverage": [
+      {
+        "creator_count": 1,
+        "deep_style_ready_creators": 1,
+        "topic": "don, hit, want"
+      },
+      {
+        "creator_count": 1,
+        "deep_style_ready_creators": 1,
+        "topic": "really, ve, having"
+      },
+      {
+        "creator_count": 1,
+        "deep_style_ready_creators": 1,
+        "topic": "like, look, car"
+      },
+      {
+        "creator_count": 1,
+        "deep_style_ready_creators": 1,
+        "topic": "going, did, know"
+      },
+      {
+        "creator_count": 1,
+        "deep_style_ready_creators": 1,
+        "topic": "oh, oh oh, ve"
+      },
+      {
+        "creator_count": 1,
+        "deep_style_ready_creators": 1,
+        "topic": "water, light, moon"
+      },
+      {
+        "creator_count": 1,
+        "deep_style_ready_creators": 1,
+        "topic": "dna, ice, life"
+      },
+      {
+        "creator_count": 1,
+        "deep_style_ready_creators": 1,
+        "topic": "asteroid, earth, hit"
+      },
+      {
+        "creator_count": 1,
+        "deep_style_ready_creators": 1,
+        "topic": "light, planet, years"
+      },
+      {
+        "creator_count": 1,
+        "deep_style_ready_creators": 1,
+        "topic": "plane, wings, zero"
+      }
+    ],
+    "total_creators": 7,
+    "total_videos": 210
+  }
+}

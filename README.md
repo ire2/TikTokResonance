@@ -10,7 +10,8 @@ A creator profiling and fit‑scoring pipeline. It ingests creator videos, extra
 - Creator profiles with structured signals and evidence
 - Resonance scoring with explainable drivers
 - Human‑in‑the‑loop labeling for a format classifier
-- Creator Strategy Workspace with creator selection, coverage confidence, pasted-idea review, and review decisions
+- Creator Strategy Workspace with Market Memory, coverage tiers, pasted-idea review, and review decisions
+- Artifact-first export/import workflow for Colab, RunPod, or Modal processing without committing raw videos
 
 ---
 
@@ -73,6 +74,11 @@ make resonance      # run resonance + write cache
 make dashboard      # live dashboard (recompute)
 make dashboard-demo # dashboard from cached results
 make demo-reset     # reset only local review decisions
+make market-index   # build data/artifacts/market_index.json
+make artifact-manifest # build data/artifacts/media_manifest.json
+make artifact-summary  # build both market index and manifest
+make clean-media-dry-run # preview raw media cleanup
+make clean-media    # delete only raw media from known video folders
 ```
 
 ---
@@ -90,9 +96,13 @@ data/
   reviews/          # local approve/revise/reject decision trail
   drafts/
   demo/             # cached resonance output
+  artifacts/        # market index + media manifest
+  artifact_packs/   # optional derived-only zip exports
 ```
 
 `make demo-reset` truncates only `data/reviews/resonance_decisions.jsonl`. It does not touch training data, labels, raw visuals, captions, embeddings, or the demo cache.
+
+`make clean-media` deletes only raw media files from `data/raw_videos` and `data/test/video`. It does not touch captions, labels, raw visual JSON, embeddings, reviews, demo cache, manifest, or market index.
 
 ---
 
@@ -129,7 +139,9 @@ resonance_score
 
 - End‑to‑end pipeline working
 - Multi‑creator ingestion and profiling
-- Dashboard with creator library, coverage confidence, pasted-idea evidence, and human review decisions
+- Dashboard with Market Memory, creator library, coverage confidence, pasted-idea evidence, and human review decisions
+- Artifact manifest/export/import path for scaling derived artifacts on cloud GPU machines
 
 Interview demo notes live in `docs/interview_demo.md`.
 Product framing lives in `docs/product_brief.md`.
+Cloud artifact factory plan lives in `notebooks/colab_artifact_factory.md`.

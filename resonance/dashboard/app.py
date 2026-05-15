@@ -20,6 +20,7 @@ from resonance.idea_review import (
     analyze_pasted_idea,
     default_creator_id,
 )
+from resonance.market_cohort import build_market_index
 from resonance.review_decisions import (
     DEFAULT_REVIEWER_ID,
     DEFAULT_DECISIONS_PATH,
@@ -285,6 +286,25 @@ def api_creator(creator_id: str):
     return JSONResponse({"creator": creator})
 
 
+@app.get("/api/market")
+def api_market():
+    return JSONResponse(build_market_index(DATA_DIR))
+
+
+@app.get("/api/market/creators")
+def api_market_creators():
+    market = build_market_index(DATA_DIR)
+    return JSONResponse({"creators": market["creators"]})
+
+
+@app.get("/api/market/formats")
+def api_market_formats():
+    market = build_market_index(DATA_DIR)
+    return JSONResponse({
+        "formats": market["summary"].get("formats_by_hit_rate", [])
+    })
+
+
 @app.post("/api/idea-review")
 def api_idea_review(request: IdeaReviewRequest):
     try:
@@ -386,6 +406,34 @@ def index():
         }
         .title { font-size: 28px; font-weight: 760; letter-spacing: 0; }
         .sub { color: var(--muted); font-size: 13px; line-height: 1.45; }
+        .market-map { margin-top: 14px; }
+        .market-grid {
+          display: grid;
+          grid-template-columns: 0.85fr 1.05fr 1.1fr;
+          gap: 10px;
+        }
+        .market-stat-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 6px;
+        }
+        .market-list {
+          display: grid;
+          gap: 6px;
+        }
+        .market-row {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 8px;
+          align-items: center;
+          border: 1px solid #26332e;
+          border-radius: 6px;
+          padding: 7px 8px;
+          color: var(--muted);
+          font-size: 12px;
+          background: #10161b;
+        }
+        .market-row strong { color: var(--text); }
         .workspace {
           display: grid;
           grid-template-columns: 310px minmax(0, 1fr);
@@ -533,7 +581,7 @@ def index():
         .section-label { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
         .muted { color: var(--muted); }
         @media (max-width: 940px) {
-          .workspace, .analysis-grid, .score-row, .columns { grid-template-columns: 1fr; }
+          .workspace, .analysis-grid, .score-row, .columns, .market-grid { grid-template-columns: 1fr; }
         }
       </style>
     </head>
@@ -546,6 +594,30 @@ def index():
           </div>
           <button class="secondary" onclick="refreshWorkspace()">Refresh</button>
         </div>
+
+        <section class="panel market-map">
+          <div class="panel-title">
+            <div>
+              <h2>Market Memory</h2>
+              <div class="sub">Local market memory with creator-specific baselines, coverage tiers, and evidence, not prediction.</div>
+            </div>
+            <span class="pill">not a global TikTok claim</span>
+          </div>
+          <div class="market-grid">
+            <div>
+              <div class="section-label">Cohort Snapshot</div>
+              <div class="market-stat-grid" id="marketStats"></div>
+            </div>
+            <div>
+              <div class="section-label">Top Formats By Observed Hit Rate</div>
+              <div class="market-list" id="marketFormats"></div>
+            </div>
+            <div>
+              <div class="section-label">Recommended Processing Queue</div>
+              <div class="market-list" id="marketQueue"></div>
+            </div>
+          </div>
+        </section>
 
         <div class="workspace">
           <aside class="panel stack">
@@ -848,6 +920,43 @@ def index():
         document.getElementById('reviewNotes').value = '';
         await loadRecentDecisions();
       }
+      function marketRow(label, value) {
+        return `<div class="market-row"><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></div>`;
+      }
+      function renderMarket(market) {
+        const summary = market.summary || {};
+        const tiers = summary.creators_by_coverage_tier || {};
+        const ready = summary.creators_ready_for_idea_review || [];
+        document.getElementById('marketStats').innerHTML = [
+          marketRow('creators', summary.total_creators ?? 0),
+          marketRow('videos', summary.total_videos ?? 0),
+          marketRow('ready', ready.length),
+          marketRow('metadata', tiers.metadata_only || 0),
+          marketRow('semantic', tiers.semantic_ready || 0),
+          marketRow('deep style', tiers.deep_style_ready || 0),
+        ].join('');
+        document.getElementById('marketFormats').innerHTML = (summary.formats_by_hit_rate || []).slice(0, 4).map(row => (
+          `<div class="market-row">
+            <strong>${escapeHtml(row.format || 'unknown')}</strong>
+            <span>${escapeHtml(Math.round((row.hit_rate || 0) * 100))}% hit · ${escapeHtml(row.labeled_count || 0)} labels</span>
+          </div>`
+        )).join('') || '<div class="sub">No format labels yet.</div>';
+        document.getElementById('marketQueue').innerHTML = (summary.recommended_processing_queue || []).slice(0, 5).map(row => (
+          `<div class="market-row">
+            <strong>${escapeHtml(row.creator_id || '-')}</strong>
+            <span>${escapeHtml(row.next_step || '-')}</span>
+          </div>`
+        )).join('') || '<div class="sub">All indexed creators are ready for idea review.</div>';
+      }
+      async function loadMarket() {
+        try {
+          const res = await fetch('/api/market');
+          const data = await res.json();
+          renderMarket(data);
+        } catch (_) {
+          document.getElementById('marketStats').innerHTML = '<div class="sub">Market memory unavailable.</div>';
+        }
+      }
       async function loadCreators() {
         const res = await fetch('/api/creators');
         const data = await res.json();
@@ -858,6 +967,7 @@ def index():
         renderCoverage();
       }
       async function refreshWorkspace() {
+        await loadMarket();
         await loadCreators();
         await analyzeIdea();
         await loadRecentDecisions();

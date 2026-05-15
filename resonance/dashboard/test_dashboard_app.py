@@ -12,6 +12,7 @@ def _write_creator_fixture(data_dir):
     (data_dir / "raw_visual").mkdir(parents=True)
     (data_dir / "labels").mkdir(parents=True)
     (data_dir / "embeddings_store").mkdir(parents=True)
+    (data_dir / "raw_data").mkdir(parents=True)
 
     (data_dir / "drafts" / f"{creator_id}_draft.yaml").write_text(
         "creator_id: expoparker\nobserved_patterns:\n  dominant_formats:\n    - skit_or_comedy\n",
@@ -22,6 +23,21 @@ def _write_creator_fixture(data_dir):
             json.dumps({"text": f"caption {idx}"}),
             encoding="utf-8",
         )
+    (data_dir / "raw_data" / "creator_metadata.json").write_text(
+        json.dumps({
+            creator_id: [
+                {
+                    "video_id": f"v{idx}",
+                    "views": (idx + 1) * 100,
+                    "likes": (idx + 1) * 10,
+                    "comments": idx,
+                    "format_pred": "skit_or_comedy",
+                }
+                for idx in range(5)
+            ]
+        }),
+        encoding="utf-8",
+    )
     (data_dir / "raw_visual" / f"{creator_id}.json").write_text(
         json.dumps({f"v{idx}": {"motion_intensity": 0.1} for idx in range(5)}),
         encoding="utf-8",
@@ -93,6 +109,8 @@ def test_dashboard_page_exposes_human_review_controls():
 
     assert response.status_code == 200
     assert "Creator Strategy Workspace" in response.text
+    assert "Market Memory" in response.text
+    assert "Coverage tiers" in response.text or "coverage tiers" in response.text
     assert "Creator Library" in response.text
     assert "Idea Review" in response.text
     assert "Human Decision" in response.text
@@ -112,6 +130,20 @@ def test_creator_library_endpoint_returns_curated_cohort(tmp_path, monkeypatch):
     assert data["cohort_label"] == "Curated demo cohort"
     assert data["creators"][0]["creator_id"] == "expoparker"
     assert data["creators"][0]["confidence_level"] == "medium"
+
+
+def test_market_endpoint_returns_market_memory(tmp_path, monkeypatch):
+    _write_creator_fixture(tmp_path)
+    monkeypatch.setattr(dashboard_app, "DATA_DIR", tmp_path)
+
+    response = TestClient(dashboard_app.app).get("/api/market")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["schema_version"] == "market_index.v1"
+    assert data["summary"]["total_creators"] == 1
+    assert data["summary"]["total_videos"] == 5
+    assert data["summary"]["formats_by_hit_rate"][0]["format"] == "skit_or_comedy"
 
 
 def test_paste_idea_endpoint_returns_local_review_payload(tmp_path, monkeypatch):

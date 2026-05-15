@@ -6,6 +6,11 @@ __pycache__/
 #fluff files
 profiling/metadata/
 data/raw_videos/
+data/test/video/*.mp4
+data/test/video/*.mov
+data/test/video/*.mkv
+data/test/video/*.webm
+data/artifact_packs/*.zip
 data/reviews/*.jsonl
 profiling/test/
 # C extensions
