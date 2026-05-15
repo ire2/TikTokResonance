@@ -1,4 +1,4 @@
-.PHONY: run run-skip labels ui train resonance random dashboard dashboard-demo env
+.PHONY: run run-skip labels ui train resonance random dashboard dashboard-demo demo-reset env
 
 env:
 	@bash -lc 'source scripts/activate_env.sh && exec $$SHELL -l'
@@ -14,6 +14,7 @@ ui: ; uvicorn profiling.label_ui.app:app --reload
 
 dashboard: ; uvicorn resonance.dashboard.app:app --reload
 dashboard-demo: ; DEMO_MODE=true RESONANCE_CACHE_PATH=data/demo/resonance_cache.json uvicorn resonance.dashboard.app:app --reload
+demo-reset: ; python -m scripts.demo_reset
 
 train: ; RUN_TRAIN=true RUN_PROFILES=false BUILD_EMBEDDINGS=false python -m pipeline.run_main
 

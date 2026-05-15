@@ -10,7 +10,7 @@ A creator profiling and fit‑scoring pipeline. It ingests creator videos, extra
 - Creator profiles with structured signals and evidence
 - Resonance scoring with explainable drivers
 - Human‑in‑the‑loop labeling for a format classifier
-- Dashboard for fit visualization and review decisions
+- Creator Strategy Workspace with creator selection, coverage confidence, pasted-idea review, and review decisions
 
 ---
 
@@ -72,6 +72,7 @@ make random         # pick a random test video
 make resonance      # run resonance + write cache
 make dashboard      # live dashboard (recompute)
 make dashboard-demo # dashboard from cached results
+make demo-reset     # reset only local review decisions
 ```
 
 ---
@@ -90,6 +91,8 @@ data/
   drafts/
   demo/             # cached resonance output
 ```
+
+`make demo-reset` truncates only `data/reviews/resonance_decisions.jsonl`. It does not touch training data, labels, raw visuals, captions, embeddings, or the demo cache.
 
 ---
 
@@ -126,6 +129,7 @@ resonance_score
 
 - End‑to‑end pipeline working
 - Multi‑creator ingestion and profiling
-- Dashboard with evidence links, suggestions, and human review decisions
+- Dashboard with creator library, coverage confidence, pasted-idea evidence, and human review decisions
 
 Interview demo notes live in `docs/interview_demo.md`.
+Product framing lives in `docs/product_brief.md`.

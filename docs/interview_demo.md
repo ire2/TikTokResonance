@@ -2,58 +2,104 @@
 
 ## 60-Second Pitch
 
-TikTokResonance is a human-in-the-loop creator strategy tool. The user is a creator strategist deciding whether a new video idea fits a specific creator's audience, format, and style before spending time producing it. Instead of giving a vague "good idea" score, the app compares the idea/video against creator history, shows semantic and visual fit signals, surfaces similar past moments as evidence, and asks the human reviewer to approve, revise, or reject the idea with notes.
+TikTokResonance is a human-in-the-loop Creator Strategy Workspace. A strategist picks a creator, checks how much local evidence exists for that creator, pastes a new idea, reviews fit evidence from cached creator memory, and saves an approve/revise/reject decision. The saved decision becomes strategy memory for the next review.
 
-The point is not to replace creator judgment. The point is to make that judgment faster, more evidence-based, and easier to audit.
+The product does not predict virality, auto-approve ideas, scrape live TikTok during the demo, or call an LLM. It turns scattered creator examples into an auditable review workflow.
 
-## Target User And Pain Point
+## Implemented Demo Workflow
 
-Target user: a creator strategist, brand strategist, or creator operations teammate who reviews many short-form video ideas.
+1. Choose a creator from the curated demo cohort.
+2. Read the coverage panel: videos analyzed, captions, visual signals, labels, hit/ok/miss counts, embeddings, and confidence level.
+3. Paste or edit an idea.
+4. Click Analyze.
+5. Review local fit evidence, hit-like examples, miss-like risks, and revision suggestions.
+6. Choose Approve, Revise, or Reject.
+7. Add notes and save the decision.
+8. Confirm the decision appears in Decision History and is appended to `data/reviews/resonance_decisions.jsonl`.
 
-Pain point: creator fit decisions are often made from memory, taste, or scattered examples. A strategist needs to know: "Does this idea sound and look like something that works for this creator, and what evidence supports that call?"
+## Creator Library
 
-## Implemented User Workflow
+The creator library is built from local artifacts only:
 
-1. Ingest creator metadata, captions, and local video artifacts.
-2. Extract visual, audio, OCR, and NLP signals.
-3. Generate a labeling queue for creator videos.
-4. Human labels each video by format and performance.
-5. Train a visual format classifier from those labels.
-6. Build creator profile drafts and semantic segment memory.
-7. Score a candidate idea/video against the active creator.
-8. Review dashboard evidence, suggestions, and fit metrics.
-9. Human marks the idea as `approve`, `revise`, or `reject` and records notes.
-10. Decision is appended locally to `data/reviews/resonance_decisions.jsonl`.
+- `data/drafts/*_draft.yaml`
+- `data/raw_visual/*.json`
+- `data/raw_captions/*.json`
+- `data/labels/format_labels.csv`
+- `data/embeddings_store/*`
 
-## Architecture
+For each creator, the dashboard shows:
 
-```mermaid
-flowchart LR
-  A["TikTok creator metadata / captions / videos"] --> B["Ingestion + normalization"]
-  B --> C["Visual, audio, OCR, NLP extraction"]
-  C --> D["Creator draft profile YAML"]
-  C --> E["Label queue CSV"]
-  E --> F["Human labeling UI"]
-  F --> G["Format classifier artifact"]
-  D --> H["Creator embedding store"]
-  G --> I["Resonance scoring"]
-  H --> I
-  J["Candidate idea or test video"] --> I
-  I --> K["FastAPI resonance API"]
-  K --> L["Dashboard: score, evidence, suggestions"]
-  L --> M["Human review decision"]
-  M --> N["Append-only JSONL review trail"]
+- videos analyzed
+- visual signal count
+- caption count
+- human label count
+- hit / ok / miss count
+- dominant formats
+- whether embeddings and segment memory exist
+- confidence level: `low`, `medium`, or `high`
+
+Confidence is based on coverage. High confidence requires useful depth across captions, labels, visual signals, and embeddings. Medium confidence means partial evidence. Low confidence means the reviewer should treat the result as thin evidence.
+
+## Paste-Idea Flow
+
+`POST /api/idea-review` accepts:
+
+```json
+{
+  "creator_id": "expoparker",
+  "idea_text": "A short creator-specific idea"
+}
 ```
+
+The demo-safe path uses local segment memory and human labels. It returns a fit score, top evidence, prior-hit evidence, prior-miss risk evidence, suggestions, coverage, and a clear analysis note. If segment memory is unavailable, the code can fall back to the cached demo payload and labels that fallback behavior explicitly.
+
+## Decision History
+
+`POST /api/review-decision` saves an append-only JSONL record with:
+
+- decision
+- creator
+- score
+- idea text and snippet
+- notes
+- timestamp
+- reviewer id, defaulting to `creator_strategist`
+- evidence video ids
+- analysis mode
+
+`GET /api/review-decisions` returns the latest local decisions for the dashboard.
+
+## Demo Reset
+
+Run:
+
+```bash
+make demo-reset
+```
+
+This truncates only:
+
+```text
+data/reviews/resonance_decisions.jsonl
+```
+
+It does not delete or modify training data, labels, raw visual data, captions, embeddings, or `data/demo/resonance_cache.json`.
 
 ## Demo Commands
 
-Use the project conda environment:
+Use the project environment:
 
 ```bash
 source scripts/activate_env.sh
 ```
 
-Run the interview-safe cached dashboard. This avoids live TikTok/network behavior:
+Reset the local decision trail:
+
+```bash
+make demo-reset
+```
+
+Run the interview-safe dashboard:
 
 ```bash
 make dashboard-demo
@@ -65,19 +111,15 @@ Open:
 http://127.0.0.1:8000
 ```
 
-Labeling UI:
-
-```bash
-make ui
-```
-
-Safe targeted tests:
+Safe verification:
 
 ```bash
 python -m compileall -q pipeline profiling resonance utils
 python -m pytest \
   profiling/ingestion/test_select_videos.py \
   profiling/label_ui/test_label_ui_app.py \
+  resonance/test_creator_library.py \
+  resonance/test_idea_review.py \
   resonance/test_resonance_report.py \
   resonance/test_resonance_score.py \
   resonance/test_review_decisions.py \
@@ -85,67 +127,52 @@ python -m pytest \
   -q
 ```
 
-Do not run the network smoke tests during the interview. These files can call `yt-dlp` or depend on live external behavior:
+Avoid network-dependent smoke tests during the interview:
 
 ```text
 profiling/ingestion/test_fetch.py
 profiling/dev/test_fetch_captions.py
 ```
 
+## Exact Demo Sequence
+
+1. Run `make demo-reset`.
+2. Run `make dashboard-demo`.
+3. Point to Creator Library and say this is a curated demo cohort, not a claim of full market coverage.
+4. Select `expoparker`, then `cleoabram`, to show confidence and coverage change by creator.
+5. Paste or keep the sample idea and click Analyze.
+6. Explain the score as evidence-based fit, not virality prediction.
+7. Open Top Evidence and the hit/miss evidence buckets.
+8. Choose `Revise`, add a note like `The topic fits, but the hook needs a clearer creator-native setup.`
+9. Save the decision.
+10. Show Decision History and mention the append-only JSONL artifact.
+11. Open `resonance/creator_library.py`, `resonance/idea_review.py`, and `resonance/review_decisions.py` if asked how it works.
+
 ## Files To Keep Open
 
-- `resonance/dashboard/app.py`: dashboard API, demo-cache path, review decision endpoints, frontend state.
-- `resonance/review_decisions.py`: local append-only human decision artifact.
-- `resonance/resonance_score.py`: core scoring tradeoffs.
-- `profiling/label_ui/app.py`: human labeling workflow for training data.
-- `profiling/dev/train_format_classifier.py`: supervised bridge from labels to model artifact.
-- `pipeline/run_main.py`: orchestration for profiles, embeddings, labels, training, resonance.
-- `data/demo/resonance_cache.json`: deterministic demo payload.
-
-## What To Show Live
-
-1. Start with `make dashboard-demo`.
-2. Explain that demo mode reads `data/demo/resonance_cache.json` instead of recomputing or scraping.
-3. Walk through the score and evidence cards.
-4. Pick `Revise`, write a short note, and save the decision.
-5. Point to `data/reviews/resonance_decisions.jsonl` as the audit trail.
-6. Open `resonance/review_decisions.py` and `resonance/dashboard/app.py` to show how the human decision is persisted.
+- `resonance/dashboard/app.py`: FastAPI endpoints and dashboard UI.
+- `resonance/creator_library.py`: coverage and confidence calculation.
+- `resonance/idea_review.py`: pasted-idea local evidence retrieval.
+- `resonance/review_decisions.py`: append-only decision artifact and reset helper.
+- `scripts/demo_reset.py`: demo reset command.
+- `data/demo/resonance_cache.json`: deterministic fallback payload.
 
 ## Known Limits
 
-- The dashboard is a compact FastAPI-rendered HTML page, not a full React frontend.
-- Persistence is file-based JSON/CSV rather than a database.
-- The score weights are hand-designed heuristics, not learned from downstream business outcomes.
-- Some ingestion scripts depend on TikTok and `yt-dlp`, so the live pipeline can be brittle.
-- Tests are focused on local deterministic behavior; scraping/network smoke tests are intentionally excluded from the interview path.
-- There is no authentication, multi-user review queue, or decision analytics yet.
+- The dashboard is still a compact FastAPI-rendered page, not a full React app.
+- Pasted-idea analysis uses lexical overlap over cached segment text rather than full semantic recomputation in demo mode.
+- Hit-vs-miss evidence is based on retrieved local examples and human labels, not outcome prediction.
+- Persistence is JSONL, not a multi-user database.
+- There is no auth, review queue assignment, or live TikTok ingestion in the demo flow.
 
 ## Future Improvements
 
-- Move review decisions and labels into SQLite or Postgres with migration-backed schemas.
-- Add a real review queue with filter/sort states and decision history per creator.
-- Add calibration: compare prior decisions against actual video performance after publication.
-- Add confidence intervals or "insufficient evidence" states so low-data creators are handled honestly.
-- Split the dashboard into a frontend app once the workflow stabilizes.
-- Add screenshot fixtures for the exact interview demo state.
+- Add semantic retrieval for pasted ideas using existing embeddings once model loading is demo-safe.
+- Move labels and decisions into SQLite or Postgres with migrations.
+- Add per-creator review queues and filters for pending/revised/rejected ideas.
+- Calibrate recommendations against post-publication outcomes.
+- Validate the workflow with creator strategists using time-to-decision, confidence lift, and revision quality.
 
-## How AI Tools Fit
+## Interview Framing
 
-AI tools can speed up implementation, refactoring, test generation, and UI iteration. They do not decide the product workflow. The human work here is defining the strategist's decision loop, choosing which signals are interpretable enough to trust, deciding where human review is mandatory, and validating that evidence makes the reviewer more confident rather than just producing a score.
-
-## Where Human Product Judgment Mattered
-
-- The system does not auto-publish or auto-approve ideas.
-- The score is paired with evidence moments and suggestions so the user can disagree.
-- The reviewer must make an explicit `approve`, `revise`, or `reject` decision.
-- Notes are saved with the score to preserve the reasoning behind a decision.
-- Demo mode prioritizes reliable review of the workflow over impressive but brittle live scraping.
-
-## Screenshot Plan
-
-No screenshots are currently committed. Capture these before the interview:
-
-1. Dashboard after `make dashboard-demo` loads.
-2. Dashboard after saving a `revise` decision with notes.
-3. Labeling UI from `make ui`.
-4. Code view of `resonance/review_decisions.py`.
+The upgrade makes the project more product-like because it starts with the user decision loop. The strategist can see what data supports the recommendation, where confidence is weak, which examples support or weaken the idea, and what decision was made. The system stays honest by showing limited coverage and keeping the human as the decision maker.

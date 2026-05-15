@@ -11,6 +11,7 @@ from uuid import uuid4
 ALLOWED_DECISIONS = {"approve", "revise", "reject"}
 DEFAULT_DECISIONS_PATH = Path("data/reviews/resonance_decisions.jsonl")
 MAX_NOTES_CHARS = 1000
+DEFAULT_REVIEWER_ID = "creator_strategist"
 
 
 class ReviewDecisionError(ValueError):
@@ -37,6 +38,7 @@ def build_review_decision(
     notes: str = "",
     *,
     source: str = "live",
+    reviewer_id: str = DEFAULT_REVIEWER_ID,
     created_at: str | None = None,
 ) -> dict[str, Any]:
     decision = (decision or "").strip().lower()
@@ -50,9 +52,11 @@ def build_review_decision(
         raise ReviewDecisionError(
             f"notes must be {MAX_NOTES_CHARS} characters or fewer"
         )
+    reviewer_id = (reviewer_id or DEFAULT_REVIEWER_ID).strip()
 
     resonance = payload.get("resonance") or {}
     evidence = payload.get("evidence") or []
+    idea_text = payload.get("idea_text") or ""
 
     return {
         "review_id": uuid4().hex,
@@ -60,11 +64,14 @@ def build_review_decision(
         "decision": decision,
         "notes": notes,
         "source": source,
+        "reviewer_id": reviewer_id,
         "creator_id": payload.get("creator_id"),
         "video_path": payload.get("video_path"),
         "idea_fingerprint": idea_fingerprint(payload),
-        "idea_text": payload.get("idea_text"),
+        "idea_text": idea_text,
+        "idea_snippet": idea_text[:140],
         "model_name": payload.get("model_name"),
+        "analysis_mode": payload.get("analysis_mode"),
         "resonance_score": resonance.get("resonance_score"),
         "semantic_alignment": resonance.get("semantic_alignment"),
         "format_alignment": resonance.get("format_alignment"),
@@ -83,12 +90,14 @@ def save_review_decision(
     *,
     path: Path = DEFAULT_DECISIONS_PATH,
     source: str = "live",
+    reviewer_id: str = DEFAULT_REVIEWER_ID,
 ) -> dict[str, Any]:
     record = build_review_decision(
         payload=payload,
         decision=decision,
         notes=notes,
         source=source,
+        reviewer_id=reviewer_id,
     )
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as f:
@@ -116,3 +125,21 @@ def load_review_decisions(
                 continue
 
     return records[-limit:][::-1]
+
+
+def reset_review_decisions(
+    path: Path = DEFAULT_DECISIONS_PATH,
+    *,
+    seed_records: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    records = seed_records or []
+    with path.open("w", encoding="utf-8") as f:
+        for record in records:
+            f.write(json.dumps(record, sort_keys=True) + "\n")
+
+    return {
+        "path": str(path),
+        "records_written": len(records),
+        "touched": [str(path)],
+    }

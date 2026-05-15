@@ -7,6 +7,7 @@ from resonance.review_decisions import (
     ReviewDecisionError,
     build_review_decision,
     load_review_decisions,
+    reset_review_decisions,
     save_review_decision,
 )
 
@@ -45,8 +46,10 @@ def test_build_review_decision_keeps_auditable_summary():
     assert record["decision"] == "approve"
     assert record["notes"] == "Evidence supports this direction."
     assert record["source"] == "demo"
+    assert record["reviewer_id"] == "creator_strategist"
     assert record["creator_id"] == "expoparker"
     assert record["resonance_score"] == 0.42
+    assert record["idea_snippet"] == "A short creator idea."
     assert record["evidence_video_ids"] == ["v1", "v2", "v3"]
     assert len(record["idea_fingerprint"]) == 16
 
@@ -72,3 +75,19 @@ def test_review_decision_validation_rejects_bad_values():
 
     with pytest.raises(ReviewDecisionError):
         build_review_decision(_payload(), decision="approve", notes="x" * (MAX_NOTES_CHARS + 1))
+
+
+def test_reset_review_decisions_only_rewrites_target_artifact(tmp_path):
+    path = tmp_path / "reviews" / "decisions.jsonl"
+    protected = tmp_path / "labels" / "format_labels.csv"
+    protected.parent.mkdir(parents=True)
+    protected.write_text("creator_id,video_id\nexpoparker,v1\n")
+
+    save_review_decision(_payload(), "approve", path=path)
+    result = reset_review_decisions(path)
+
+    assert result["records_written"] == 0
+    assert result["touched"] == [str(path)]
+    assert path.exists()
+    assert path.read_text() == ""
+    assert protected.read_text() == "creator_id,video_id\nexpoparker,v1\n"
