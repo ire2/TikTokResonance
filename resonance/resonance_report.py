@@ -41,6 +41,16 @@ def build_creator_embedding(
     }
 
 
+def _format_match_label(format_alignment):
+    if format_alignment is None:
+        return "unknown"
+    if format_alignment >= 0.8:
+        return "strong"
+    if format_alignment >= 0.5:
+        return "partial"
+    return "weak"
+
+
 def build_resonance_report(idea: str, resonance: dict) -> dict:
     return {
         "idea_text": idea,
@@ -56,8 +66,7 @@ def build_resonance_report(idea: str, resonance: dict) -> dict:
                 else "low"
             ),
             "format_match": (
-                "strong" if resonance["dialogue_affinity"] > 0.7
-                else "weak"
+                _format_match_label(resonance.get("format_alignment"))
             ),
         },
     }

@@ -1,8 +1,9 @@
 from pathlib import Path
 import csv
+import html as html_lib
 from typing import Dict, List
 
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 
@@ -168,14 +169,22 @@ def index():
         return HTMLResponse(html)
 
     url = current.get("tiktok_url", "")
+    url_attr = html_lib.escape(url, quote=True)
+    creator_text = html_lib.escape(str(current.get("creator_id", "")))
+    creator_attr = html_lib.escape(str(current.get("creator_id", "")), quote=True)
+    video_id_text = html_lib.escape(str(current.get("video_id", "")))
+    video_id_attr = html_lib.escape(str(current.get("video_id", "")), quote=True)
 
     def options_html(name, options, selected=""):
         opts = []
+        name_attr = html_lib.escape(name, quote=True)
         for o in options:
             sel = "selected" if o == selected else ""
-            opts.append(f"<option value='{o}' {sel}>{o}</option>")
+            value = html_lib.escape(o, quote=True)
+            label = html_lib.escape(o)
+            opts.append(f"<option value='{value}' {sel}>{label}</option>")
         return (
-            f"<select name='{name}' required>"
+            f"<select name='{name_attr}' required>"
             + "".join(opts)
             + "</select>"
         )
@@ -195,6 +204,12 @@ def index():
         if len(s) == 8 and s.isdigit():
             return f"{s[:4]}-{s[4:6]}-{s[6:]}"
         return s
+
+    views_text = html_lib.escape(fmt_num(current.get("views")))
+    likes_text = html_lib.escape(fmt_num(current.get("likes")))
+    comments_text = html_lib.escape(fmt_num(current.get("comments")))
+    duration_text = html_lib.escape(fmt_num(current.get("duration_sec")))
+    posted_text = html_lib.escape(fmt_date(current.get("posted_at")))
 
     html = f"""
     <html>
@@ -370,7 +385,7 @@ def index():
         <div class="header">
           <div>
             <div class="title">Resonance Labeling</div>
-            <div class="sub">Creator: {current.get("creator_id")} • Video {labeled + 1} of {total}</div>
+            <div class="sub">Creator: {creator_text} • Video {labeled + 1} of {total}</div>
           </div>
           <div class="progress">
             <div class="pill">{labeled} labeled • {total - labeled} remaining</div>
@@ -381,29 +396,29 @@ def index():
         <div class="layout">
           <div class="card">
             <div class="embed">
-              <blockquote class="tiktok-embed" cite="{url}" data-video-id="{current.get("video_id")}" style="max-width: 605px;min-width: 325px;" >
+              <blockquote class="tiktok-embed" cite="{url_attr}" data-video-id="{video_id_attr}" style="max-width: 605px;min-width: 325px;" >
                 <section></section>
               </blockquote>
               <script async src="https://www.tiktok.com/embed.js"></script>
             </div>
-            <a class="link" href="{url}" target="_blank">Open in TikTok</a>
+            <a class="link" href="{url_attr}" target="_blank" rel="noopener">Open in TikTok</a>
           </div>
 
           <div class="card">
             <div class="form">
               <div class="section-title">Video Metrics</div>
               <div class="meta">
-                <div>views: {fmt_num(current.get("views"))}</div>
-                <div>likes: {fmt_num(current.get("likes"))}</div>
-                <div>comments: {fmt_num(current.get("comments"))}</div>
-                <div>duration: {fmt_num(current.get("duration_sec"))}s</div>
-                <div>posted: {fmt_date(current.get("posted_at"))}</div>
-                <div>video_id: {current.get("video_id")}</div>
+                <div>views: {views_text}</div>
+                <div>likes: {likes_text}</div>
+                <div>comments: {comments_text}</div>
+                <div>duration: {duration_text}s</div>
+                <div>posted: {posted_text}</div>
+                <div>video_id: {video_id_text}</div>
               </div>
               <div class="section-title">Labels</div>
               <form action="/label" method="post">
-                <input type="hidden" name="creator_id" value="{current.get("creator_id")}">
-                <input type="hidden" name="video_id" value="{current.get("video_id")}">
+                <input type="hidden" name="creator_id" value="{creator_attr}">
+                <input type="hidden" name="video_id" value="{video_id_attr}">
                 <label>Format</label>
                 {options_html("format_label", FORMAT_LABELS, current.get("format_label",""))}
                 <label>Performance</label>
@@ -430,11 +445,20 @@ def label(
     format_label: str = Form(...),
     performance_label: str = Form(...),
 ):
+    if format_label not in FORMAT_LABELS:
+        raise HTTPException(status_code=400, detail="Invalid format_label")
+    if performance_label not in PERFORMANCE_LABELS:
+        raise HTTPException(status_code=400, detail="Invalid performance_label")
+
     rows = load_rows()
+    updated = False
     for r in rows:
         if r.get("creator_id") == creator_id and r.get("video_id") == video_id:
             r["format_label"] = format_label
             r["performance_label"] = performance_label
+            updated = True
             break
+    if not updated:
+        raise HTTPException(status_code=404, detail="Video not found in label queue")
     save_rows(rows)
     return RedirectResponse("/", status_code=303)

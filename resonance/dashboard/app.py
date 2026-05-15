@@ -3,7 +3,8 @@ import os
 import json
 import yaml
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from profiling.utils.creator_config import get_active_creator, get_default_model_name
@@ -13,6 +14,12 @@ from profiling.embedding.embedding_store import load_creator_embeddings
 from resonance.idea_encoder import encode_idea
 from resonance.resonance_score import compute_resonance
 from resonance.resonance_report import build_resonance_report
+from resonance.review_decisions import (
+    DEFAULT_DECISIONS_PATH,
+    ReviewDecisionError,
+    load_review_decisions,
+    save_review_decision,
+)
 from profiling.cv.visual_signals import extract_visual_signals
 from profiling.cv.learned_classifier import LearnedFormatClassifier
 from profiling.nlp.asr import ensure_captions
@@ -23,12 +30,20 @@ TEST_VIDEO_DIR = Path("data/test/video")
 RAW_VISUAL_PATH = Path("data/raw_visual")
 DRAFTS_DIR = Path("data/drafts")
 CACHE_PATH = Path(os.getenv("RESONANCE_CACHE_PATH", "data/demo/resonance_cache.json"))
+REVIEW_DECISIONS_PATH = Path(
+    os.getenv("REVIEW_DECISIONS_PATH", str(DEFAULT_DECISIONS_PATH))
+)
 DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() == "true"
 
 os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
 os.environ.setdefault("TRANSFORMERS_NO_ADVISORY_WARNINGS", "1")
 app = FastAPI()
 silence_common_warnings()
+
+
+class ReviewDecisionRequest(BaseModel):
+    decision: str
+    notes: str = ""
 
 
 def _find_latest_video() -> Path:
@@ -218,6 +233,36 @@ def api_resonance():
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
+@app.get("/api/review-decisions")
+def api_review_decisions():
+    return JSONResponse({
+        "decisions": load_review_decisions(REVIEW_DECISIONS_PATH, limit=5),
+        "path": str(REVIEW_DECISIONS_PATH),
+    })
+
+
+@app.post("/api/review-decision")
+def api_review_decision(request: ReviewDecisionRequest):
+    try:
+        payload = _compute_resonance_from_video()
+        record = save_review_decision(
+            payload=payload,
+            decision=request.decision,
+            notes=request.notes,
+            path=REVIEW_DECISIONS_PATH,
+            source="demo" if DEMO_MODE else "live",
+        )
+        return JSONResponse({
+            "saved": True,
+            "decision": record,
+            "path": str(REVIEW_DECISIONS_PATH),
+        })
+    except ReviewDecisionError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
 @app.get("/", response_class=HTMLResponse)
 def index():
     html = """
@@ -287,6 +332,33 @@ def index():
         .error { color:#ffb3b3; }
         @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
         button { background: linear-gradient(180deg, #21f0c9 0%, #0ec2a3 100%); border:0; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; }
+        .review-controls { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+        .decision-btn {
+          background:#0f1522;
+          color:var(--text);
+          border:1px solid var(--border);
+          min-width:88px;
+        }
+        .decision-btn.selected {
+          background: linear-gradient(180deg, #21f0c9 0%, #0ec2a3 100%);
+          color:#08211d;
+          border-color:#165f55;
+        }
+        textarea {
+          width:100%;
+          min-height:76px;
+          margin-top:10px;
+          padding:10px 12px;
+          border-radius:10px;
+          border:1px solid var(--border);
+          background:#0f1522;
+          color:var(--text);
+          font-family:inherit;
+          resize:vertical;
+        }
+        .review-status { margin-top:8px; font-size:12px; color:var(--muted); }
+        .recent-decision { padding:8px 10px; border:1px solid #223246; border-radius:10px; margin-top:8px; background:#0e1420; }
+        .recent-decision strong { color:var(--text); }
       </style>
     </head>
     <body>
@@ -323,11 +395,25 @@ def index():
               <div class="sub">Idea Surgery</div>
               <div id="suggestions"></div>
             </div>
+            <div style="margin-top:14px;">
+              <div class="sub">Human Review Decision</div>
+              <div class="review-controls">
+                <button class="decision-btn" id="decision-approve" type="button" onclick="setDecision('approve')">Approve</button>
+                <button class="decision-btn" id="decision-revise" type="button" onclick="setDecision('revise')">Revise</button>
+                <button class="decision-btn" id="decision-reject" type="button" onclick="setDecision('reject')">Reject</button>
+              </div>
+              <textarea id="reviewNotes" maxlength="1000" placeholder="Short rationale for the decision"></textarea>
+              <button style="margin-top:8px;" type="button" onclick="saveDecision()">Save Decision</button>
+              <div class="review-status" id="reviewStatus">Saved decisions append to data/reviews/resonance_decisions.jsonl.</div>
+              <div style="margin-top:12px;" class="sub">Recent Decisions</div>
+              <div id="recentDecisions" class="evidence"></div>
+            </div>
           </div>
         </div>
-      </div>
+    </div>
     <script>
       let chart;
+      let selectedDecision = 'revise';
       const fmt = (v) => (v === null || v === undefined) ? 'N/A' : Number(v).toFixed(2);
       const CENSOR_WORDS = [
         'fuck', 'fucking', 'fucked', 'fucker',
@@ -344,6 +430,74 @@ def index():
         }
         return out;
       }
+      const ESCAPE_CHARS = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      };
+      function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, ch => ESCAPE_CHARS[ch]);
+      }
+      function safeTikTokUrl(value) {
+        try {
+          const url = new URL(value, window.location.origin);
+          const host = url.hostname.toLowerCase();
+          if (url.protocol === 'https:' && (host === 'tiktok.com' || host === 'www.tiktok.com' || host.endsWith('.tiktok.com'))) {
+            return url.href;
+          }
+        } catch (_) {}
+        return '';
+      }
+      function setDecision(decision) {
+        selectedDecision = decision;
+        for (const value of ['approve', 'revise', 'reject']) {
+          const el = document.getElementById(`decision-${value}`);
+          if (el) el.classList.toggle('selected', value === decision);
+        }
+      }
+      function renderRecentDecisions(decisions) {
+        const target = document.getElementById('recentDecisions');
+        const html = (decisions || []).map(d => {
+          const score = fmt(d.resonance_score);
+          const note = d.notes ? `<div>${escapeHtml(d.notes)}</div>` : '';
+          return `<div class="recent-decision">
+            <div><strong>${escapeHtml(d.decision || '-')}</strong> · score ${escapeHtml(score)} · ${escapeHtml(d.created_at || '')}</div>
+            ${note}
+          </div>`;
+        }).join('');
+        target.innerHTML = html || '<div class="sub">No review decisions saved yet.</div>';
+      }
+      async function loadRecentDecisions() {
+        try {
+          const res = await fetch('/api/review-decisions');
+          const data = await res.json();
+          renderRecentDecisions(data.decisions || []);
+        } catch (_) {
+          renderRecentDecisions([]);
+        }
+      }
+      async function saveDecision() {
+        const notes = document.getElementById('reviewNotes').value || '';
+        const status = document.getElementById('reviewStatus');
+        status.innerText = 'Saving decision...';
+        const res = await fetch('/api/review-decision', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ decision: selectedDecision, notes })
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          status.innerText = `Save failed: ${data.detail || data.error || res.status}`;
+          status.classList.add('error');
+          return;
+        }
+        status.classList.remove('error');
+        status.innerText = `Saved ${data.decision.decision} decision to ${data.path}`;
+        document.getElementById('reviewNotes').value = '';
+        await loadRecentDecisions();
+      }
       async function loadData() {
         const res = await fetch('/api/resonance');
         const data = await res.json();
@@ -356,8 +510,8 @@ def index():
         const videoName = (data.video_path || '').split('/').slice(-1)[0];
         document.getElementById('subtitle').innerText = `Creator: ${data.creator_id}`;
         document.getElementById('meta').innerHTML = `
-          <span class="pill">Video: ${videoName || '-'}</span>
-          <span class="pill">Model: ${data.model_name || '-'}</span>
+          <span class="pill">Video: ${escapeHtml(videoName || '-')}</span>
+          <span class="pill">Model: ${escapeHtml(data.model_name || '-')}</span>
         `;
         document.getElementById('score').innerText = fmt(data.resonance.resonance_score);
         const interp = data.interpretation || {};
@@ -373,17 +527,21 @@ def index():
         `;
         document.getElementById('idea').innerText = censor(data.idea_text || '');
 
-        const ev = (data.evidence || []).slice(0,3).map(e => (
-          `<div class="evidence-item">
-            <div class="sub">video ${e.video_id || '-'} · similarity ${fmt(e.similarity)}</div>
-            <div>${censor(e.text || '')}</div>
-            ${e.tiktok_url ? `<div><a href="${e.tiktok_url}" target="_blank" rel="noopener">Open video</a></div>` : ''}
-          </div>`
-        )).join('');
+        const ev = (data.evidence || []).slice(0,3).map(e => {
+          const videoId = escapeHtml(e.video_id || '-');
+          const similarity = escapeHtml(fmt(e.similarity));
+          const text = escapeHtml(censor(e.text || ''));
+          const url = safeTikTokUrl(e.tiktok_url);
+          return `<div class="evidence-item">
+            <div class="sub">video ${videoId} · similarity ${similarity}</div>
+            <div>${text}</div>
+            ${url ? `<div><a href="${url}" target="_blank" rel="noopener">Open video</a></div>` : ''}
+          </div>`;
+        }).join('');
         document.getElementById('evidence').innerHTML = ev || '<div class="sub">No evidence available</div>';
 
         const sugg = (data.suggestions || []).map(s => (
-          `<div class="suggestion"><h4>${s.title}</h4><div class="sub">${s.detail}</div></div>`
+          `<div class="suggestion"><h4>${escapeHtml(s.title || '')}</h4><div class="sub">${escapeHtml(s.detail || '')}</div></div>`
         )).join('');
         document.getElementById('suggestions').innerHTML = sugg || '<div class="sub">No suggestions.</div>';
 
@@ -434,7 +592,9 @@ def index():
           <div class="metric">dialogue affinity: ${fmt(data.resonance.dialogue_affinity)}</div>
           <div class="metric">talking head: ${fmt(data.resonance.talking_head_affinity)}</div>
         `;
+        await loadRecentDecisions();
       }
+      setDecision(selectedDecision);
       loadData();
     </script>
     </body>

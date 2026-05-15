@@ -10,7 +10,7 @@ A creator profiling and fit‑scoring pipeline. It ingests creator videos, extra
 - Creator profiles with structured signals and evidence
 - Resonance scoring with explainable drivers
 - Human‑in‑the‑loop labeling for a format classifier
-- Dashboard for fit visualization
+- Dashboard for fit visualization and review decisions
 
 ---
 
@@ -86,6 +86,7 @@ data/
   raw_data/
   embeddings_store/
   labels/
+  reviews/          # local approve/revise/reject decision trail
   drafts/
   demo/             # cached resonance output
 ```
@@ -125,4 +126,6 @@ resonance_score
 
 - End‑to‑end pipeline working
 - Multi‑creator ingestion and profiling
-- Dashboard with evidence links and suggestions
+- Dashboard with evidence links, suggestions, and human review decisions
+
+Interview demo notes live in `docs/interview_demo.md`.
