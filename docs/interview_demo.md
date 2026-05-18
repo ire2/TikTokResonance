@@ -53,6 +53,12 @@ Confidence is based on coverage. High confidence requires useful depth across ca
 
 The demo-safe path uses local segment memory and human labels. It returns a fit score, top evidence, prior-hit evidence, prior-miss risk evidence, suggestions, coverage, and a clear analysis note. If segment memory is unavailable, the code can fall back to the cached demo payload and labels that fallback behavior explicitly.
 
+## Presentation Safety
+
+The local creator examples include comedy/skit captions, so raw evidence text can contain adult language. In demo mode, the dashboard masks explicit terms in evidence text while preserving the scoring inputs, labels, video ids, similarity scores, and decision record.
+
+If asked, say: “The underlying corpus is real creator-caption data, and some comedy clips include adult language. For a professional demo, I use a presentation-safe view that masks the text. The ranking and labels are still computed from the same local evidence.”
+
 ## Decision History
 
 `POST /api/review-decision` saves an append-only JSONL record with:
@@ -105,6 +111,20 @@ Run the interview-safe dashboard:
 make dashboard-demo
 ```
 
+Live test-video shortcut if asked:
+
+```bash
+upload gray.davis 7639092976248999181
+```
+
+That command downloads the video locally and uploads it to the running dashboard for transcript extraction and scoring.
+
+The shortcut can also infer the creator from a quoted TikTok URL:
+
+```bash
+upload 'https://www.tiktok.com/@gray.davis/video/7639092976248999181'
+```
+
 Open:
 
 ```text
@@ -142,11 +162,32 @@ profiling/dev/test_fetch_captions.py
 4. Select `expoparker`, then `cleoabram`, to show confidence and coverage change by creator.
 5. Paste or keep the sample idea and click Analyze.
 6. Explain the score as evidence-based fit, not virality prediction.
-7. Open Top Evidence and the hit/miss evidence buckets.
+7. Open Top Evidence and the hit/miss evidence buckets; if text masking appears, mention it is presentation-safe masking over real caption evidence.
 8. Choose `Revise`, add a note like `The topic fits, but the hook needs a clearer creator-native setup.`
 9. Save the decision.
 10. Show Decision History and mention the append-only JSONL artifact.
 11. Open `resonance/creator_library.py`, `resonance/idea_review.py`, and `resonance/review_decisions.py` if asked how it works.
+
+## Optional: Human Labeling Loop
+
+If the interviewer asks where the hit/miss evidence comes from, show the upstream labeling path:
+
+```bash
+make labels
+make ui
+```
+
+Then open:
+
+```text
+http://127.0.0.1:8000
+```
+
+Say: “This is the human-in-the-loop training/evidence layer. The system downloads and profiles creator videos, then a reviewer labels format and performance. Those labels feed the dashboard evidence buckets, so the review surface is grounded in human judgment rather than hidden automation.”
+
+The label UI and dashboard both default to port `8000`, so stop the dashboard before running `make ui`, or run one of them on another port.
+
+Avoid live-downloading a new creator unless asked. It depends on TikTok/network behavior and can waste interview time. The best live move is to show the label UI over the existing curated cohort and explain the command path for adding another creator through `config.yaml` and `make run`.
 
 ## Files To Keep Open
 

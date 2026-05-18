@@ -2,6 +2,7 @@ from pathlib import Path
 import csv
 import html as html_lib
 from typing import Dict, List
+from urllib.parse import quote
 
 from fastapi import FastAPI, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -74,17 +75,149 @@ def count_labeled(rows: List[Dict]) -> int:
     )
 
 
+def _parse_metric(value) -> float | None:
+    if value is None or value == "":
+        return None
+    try:
+        return float(value)
+    except Exception:
+        return None
+
+
+def _format_compact_number(value: float | int | str | None) -> str:
+    parsed = _parse_metric(value)
+    if parsed is None:
+        return "-"
+    abs_value = abs(parsed)
+    units = [
+        (1_000_000_000, "B"),
+        (1_000_000, "M"),
+        (1_000, "K"),
+    ]
+    for threshold, suffix in units:
+        if abs_value >= threshold:
+            scaled = parsed / threshold
+            text = f"{scaled:.1f}".rstrip("0").rstrip(".")
+            return f"{text}{suffix}"
+    return f"{int(parsed):,}" if parsed.is_integer() else f"{parsed:,.1f}"
+
+
+def _format_duration(value: float | int | str | None) -> str:
+    parsed = _parse_metric(value)
+    if parsed is None:
+        return "-"
+    seconds = int(round(parsed))
+    if seconds < 60:
+        return f"{seconds} sec"
+    minutes, remainder = divmod(seconds, 60)
+    if remainder == 0:
+        return f"{minutes} min"
+    return f"{minutes}m {remainder}s"
+
+
+def _rank_summary(rank: int | None, total: int) -> tuple[str, str]:
+    if not rank or total <= 0:
+        return ("No rank", "Not enough creator data")
+    if total == 1:
+        return ("Only sample", "Needs more videos")
+
+    percentile = max(1, round((rank / total) * 100))
+    if percentile <= 10:
+        band = "top 10%"
+    elif percentile <= 25:
+        band = "top 25%"
+    elif percentile >= 90:
+        band = "bottom 10%"
+    elif percentile >= 75:
+        band = "bottom 25%"
+    else:
+        band = "middle range"
+    return (f"#{rank} of {total}", f"{band} for this creator")
+
+
+def _metric_context(rows: List[Dict], current: Dict) -> str:
+    metric_labels = {
+        "views": ("Views", _format_compact_number),
+        "likes": ("Likes", _format_compact_number),
+        "comments": ("Comments", _format_compact_number),
+        "duration_sec": ("Duration", _format_duration),
+    }
+    cards = []
+    current_id = current.get("video_id")
+
+    for metric, (label, formatter) in metric_labels.items():
+        values = [
+            (r, _parse_metric(r.get(metric)))
+            for r in rows
+        ]
+        values = [(r, v) for r, v in values if v is not None]
+        if not values:
+            continue
+
+        low_row, low_value = min(values, key=lambda item: item[1])
+        high_row, high_value = max(values, key=lambda item: item[1])
+        ranked = sorted(values, key=lambda item: item[1], reverse=True)
+        rank = next(
+            (
+                idx
+                for idx, (row, _) in enumerate(ranked, start=1)
+                if row.get("video_id") == current_id
+            ),
+            None,
+        )
+        rank_text, band_text = _rank_summary(rank, len(ranked))
+        current_value = next(
+            (
+                value
+                for row, value in ranked
+                if row.get("video_id") == current_id
+            ),
+            None,
+        )
+
+        label_text = html_lib.escape(label)
+        current_text = html_lib.escape(formatter(current_value))
+        high_text = html_lib.escape(formatter(high_value))
+        low_text = html_lib.escape(formatter(low_value))
+        rank_safe = html_lib.escape(rank_text)
+        band_safe = html_lib.escape(band_text)
+        cards.append(
+            f"""
+            <div class="metric-card">
+              <div class="metric-top">
+                <span>{label_text}</span>
+                <strong>{current_text}</strong>
+              </div>
+              <div class="metric-rank">{rank_safe}</div>
+              <small>{band_safe} · creator range {low_text} to {high_text}</small>
+            </div>
+            """
+        )
+
+    return "".join(cards) or "<div>No creator-level metrics available.</div>"
+
+
 @app.get("/", response_class=HTMLResponse)
-def index():
+def index(creator: str | None = None):
     rows = load_rows()
     if not rows:
         return HTMLResponse(
             "<h3>No labels CSV found. Run generate_label_queue.py first.</h3>"
         )
 
-    current = first_unlabeled(rows)
-    labeled = count_labeled(rows)
-    total = len(rows)
+    visible_rows = [
+        r for r in rows
+        if not creator or r.get("creator_id") == creator
+    ]
+    current = first_unlabeled(visible_rows)
+    labeled = count_labeled(visible_rows)
+    total = len(visible_rows)
+
+    if creator and not visible_rows:
+        safe_creator = html_lib.escape(creator)
+        return HTMLResponse(
+            f"<h3>No label rows found for creator: {safe_creator}</h3>"
+        )
 
     if not current:
         html = f"""
@@ -174,6 +307,7 @@ def index():
     creator_attr = html_lib.escape(str(current.get("creator_id", "")), quote=True)
     video_id_text = html_lib.escape(str(current.get("video_id", "")))
     video_id_attr = html_lib.escape(str(current.get("video_id", "")), quote=True)
+    creator_query_attr = html_lib.escape(str(creator or ""), quote=True)
 
     def options_html(name, options, selected=""):
         opts = []
@@ -189,14 +323,6 @@ def index():
             + "</select>"
         )
 
-    def fmt_num(v):
-        if v is None or v == "":
-            return "-"
-        try:
-            return f"{int(v):,}"
-        except Exception:
-            return str(v)
-
     def fmt_date(v):
         if not v:
             return "-"
@@ -205,11 +331,16 @@ def index():
             return f"{s[:4]}-{s[4:6]}-{s[6:]}"
         return s
 
-    views_text = html_lib.escape(fmt_num(current.get("views")))
-    likes_text = html_lib.escape(fmt_num(current.get("likes")))
-    comments_text = html_lib.escape(fmt_num(current.get("comments")))
-    duration_text = html_lib.escape(fmt_num(current.get("duration_sec")))
+    creator_metric_rows = [
+        r for r in rows
+        if r.get("creator_id") == current.get("creator_id")
+    ]
+    views_text = html_lib.escape(_format_compact_number(current.get("views")))
+    likes_text = html_lib.escape(_format_compact_number(current.get("likes")))
+    comments_text = html_lib.escape(_format_compact_number(current.get("comments")))
+    duration_text = html_lib.escape(_format_duration(current.get("duration_sec")))
     posted_text = html_lib.escape(fmt_date(current.get("posted_at")))
+    metric_context = _metric_context(creator_metric_rows, current)
 
     html = f"""
     <html>
@@ -260,7 +391,7 @@ def index():
           font-family: "Space Grotesk", sans-serif;
           font-size: 30px;
           font-weight: 700;
-          letter-spacing: -0.02em;
+          letter-spacing: 0;
         }}
         .sub {{
           color: var(--muted);
@@ -293,23 +424,74 @@ def index():
         .card {{
           background: linear-gradient(180deg, var(--card) 0%, var(--card-2) 100%);
           border: 1px solid var(--border);
-          border-radius: 16px;
+          border-radius: 8px;
           box-shadow: var(--shadow);
           padding: 16px;
         }}
         .meta {{
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 8px 12px;
+          gap: 1px 14px;
           color: var(--muted);
           font-size: 13px;
+          overflow: hidden;
+          border: 1px solid #26364a;
+          border-radius: 8px;
         }}
         .meta div {{
+          display: grid;
+          gap: 2px;
+          background: rgba(15, 26, 42, 0.55);
+          padding: 9px 10px;
+        }}
+        .meta span {{
+          color: var(--muted);
+          font-size: 11px;
+          text-transform: uppercase;
+        }}
+        .meta strong {{
+          color: var(--text);
+          font-size: 15px;
+          font-weight: 700;
+          overflow-wrap: anywhere;
+        }}
+        .metric-context {{
+          display: grid;
+          gap: 8px;
+          margin-top: 4px;
+        }}
+        .metric-card {{
+          display: grid;
+          gap: 5px;
           background: linear-gradient(180deg, #0f1a2a 0%, #0c1522 100%);
           border: 1px solid #26364a;
-          border-radius: 10px;
-          padding: 8px 10px;
-          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+          border-radius: 8px;
+          padding: 10px;
+          color: var(--muted);
+          font-size: 12px;
+        }}
+        .metric-top {{
+          display: flex;
+          align-items: baseline;
+          justify-content: space-between;
+          gap: 12px;
+        }}
+        .metric-top span {{
+          color: var(--muted);
+          font-size: 11px;
+          text-transform: uppercase;
+        }}
+        .metric-context strong {{
+          color: var(--text);
+          font-size: 17px;
+        }}
+        .metric-rank {{
+          color: #cfe4ff;
+          font-size: 13px;
+          font-weight: 600;
+        }}
+        .metric-context small {{
+          color: var(--muted);
         }}
         .embed {{
           margin: 8px 0 6px;
@@ -340,7 +522,7 @@ def index():
         select {{
           width: 100%;
           padding: 10px 12px;
-          border-radius: 12px;
+          border-radius: 8px;
           border: 1px solid var(--border);
           background: #0f151d;
           color: var(--text);
@@ -348,7 +530,7 @@ def index():
         }}
         .btn {{
           padding: 12px 14px;
-          border-radius: 12px;
+          border-radius: 8px;
           border: 1px solid #165f55;
           background: linear-gradient(180deg, #21f0c9 0%, #0ec2a3 100%);
           color: #08211d;
@@ -408,17 +590,22 @@ def index():
             <div class="form">
               <div class="section-title">Video Metrics</div>
               <div class="meta">
-                <div>views: {views_text}</div>
-                <div>likes: {likes_text}</div>
-                <div>comments: {comments_text}</div>
-                <div>duration: {duration_text}s</div>
-                <div>posted: {posted_text}</div>
-                <div>video_id: {video_id_text}</div>
+                <div><span>Views</span><strong>{views_text}</strong></div>
+                <div><span>Likes</span><strong>{likes_text}</strong></div>
+                <div><span>Comments</span><strong>{comments_text}</strong></div>
+                <div><span>Duration</span><strong>{duration_text}</strong></div>
+                <div><span>Posted</span><strong>{posted_text}</strong></div>
+                <div><span>Video ID</span><strong>{video_id_text}</strong></div>
+              </div>
+              <div class="section-title">Creator-Relative Metrics</div>
+              <div class="metric-context">
+                {metric_context}
               </div>
               <div class="section-title">Labels</div>
               <form action="/label" method="post">
                 <input type="hidden" name="creator_id" value="{creator_attr}">
                 <input type="hidden" name="video_id" value="{video_id_attr}">
+                <input type="hidden" name="creator_filter" value="{creator_query_attr}">
                 <label>Format</label>
                 {options_html("format_label", FORMAT_LABELS, current.get("format_label",""))}
                 <label>Performance</label>
@@ -444,6 +631,7 @@ def label(
     video_id: str = Form(...),
     format_label: str = Form(...),
     performance_label: str = Form(...),
+    creator_filter: str = Form(""),
 ):
     if format_label not in FORMAT_LABELS:
         raise HTTPException(status_code=400, detail="Invalid format_label")
@@ -461,4 +649,5 @@ def label(
     if not updated:
         raise HTTPException(status_code=404, detail="Video not found in label queue")
     save_rows(rows)
-    return RedirectResponse("/", status_code=303)
+    redirect = f"/?creator={quote(creator_filter)}" if creator_filter else "/"
+    return RedirectResponse(redirect, status_code=303)

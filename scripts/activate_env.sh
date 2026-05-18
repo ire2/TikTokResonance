@@ -14,4 +14,10 @@ fi
 source "$CONDA_SH"
 conda activate "$ENV_NAME"
 
+PROJECT_BIN="$(pwd)/scripts/bin"
+if [[ -d "$PROJECT_BIN" ]]; then
+  export PATH="$PROJECT_BIN:$PATH"
+fi
+
 echo "Activated conda env: $ENV_NAME"
+echo "Shortcut available: upload <creator> <TikTok URL or video id>"

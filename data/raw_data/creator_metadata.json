@@ -2952,5 +2952,77 @@
       "description": "Pude card #fyp #clown #comedy #spirituality #tarot ",
       "posted_at": "20260209"
     }
+  ],
+  "washingtonpost": [
+    {
+      "video_id": "7609177768793787679",
+      "local_path": "data/raw_videos/washingtonpost_7609177768793787679.mp4",
+      "duration_sec": 40,
+      "likes": 483700,
+      "views": 6300000,
+      "comments": 2584,
+      "has_voice": true,
+      "has_text": true,
+      "format": null,
+      "format_pred": "skit_or_comedy",
+      "description": "The Supreme Court struck down most of President Donald Trump\u2019s tariffs in a 6-3 ruling on Friday.  The court said Trump didn\u2019t have authority under the 1977 International Emergency Economic Powers Act (IEEPA) to put tariffs on goods from nearly all of the U.S. trading partners. Trump said he would replace the import taxes the court overturned with a 10 percent global tariff using different trade laws than the one the court ruled on. At a White House news conference, he called the justices who sided against him a \u201cdisgrace to our nation.\u201d",
+      "posted_at": "20260221"
+    },
+    {
+      "video_id": "7612856112412495134",
+      "local_path": "data/raw_videos/washingtonpost_7612856112412495134.mp4",
+      "duration_sec": 50,
+      "likes": 250400,
+      "views": 3700000,
+      "comments": 1167,
+      "has_voice": true,
+      "has_text": true,
+      "format": null,
+      "format_pred": "skit_or_comedy",
+      "description": "The U.S.-Israeli attack on Iran and wide-scale Iranian reprisals expanded Monday as the United States pledged to send more troops to the region.\u00a0",
+      "posted_at": "20260303"
+    },
+    {
+      "video_id": "7637188014405455117",
+      "local_path": "data/raw_videos/washingtonpost_7637188014405455117.mp4",
+      "duration_sec": 62,
+      "likes": 241,
+      "views": 5012,
+      "comments": 6,
+      "has_voice": true,
+      "has_text": true,
+      "format": null,
+      "format_pred": "educational",
+      "description": "Disney reanimated some of its most iconic songs to be performed in American Sign Language to mark National Deaf History Month. Read more from The Washington Post at the link in our bio. #disney #americansignlanguage #animation",
+      "posted_at": "20260507"
+    },
+    {
+      "video_id": "7637149430356937998",
+      "local_path": "data/raw_videos/washingtonpost_7637149430356937998.mp4",
+      "duration_sec": 43,
+      "likes": 337,
+      "views": 4893,
+      "comments": 3,
+      "has_voice": true,
+      "has_text": true,
+      "format": null,
+      "format_pred": "talking_head",
+      "description": "A massive sea lion nicknamed Chonkers is waddling his way into the hearts of tourists and locals who have flocked to San Francisco\u2019s Pier 39 for a glimpse. Chonkers has been one of the few Steller sea lions to venture to the pier, which is protected from predators and crashing waves while providing a fish-filled buffet. Read more from The Washington Post at the link in our bio. #chonkers #sanfrancisco #sealion #news",
+      "posted_at": "20260507"
+    },
+    {
+      "video_id": "7637520530622401805",
+      "local_path": "data/raw_videos/washingtonpost_7637520530622401805.mp4",
+      "duration_sec": 83,
+      "likes": 186,
+      "views": 4296,
+      "comments": 6,
+      "has_voice": true,
+      "has_text": true,
+      "format": null,
+      "format_pred": "skit_or_comedy",
+      "description": "Sir David Attenborough, who has been documenting nature for more than six decades, turned 100. Attenborough has used his spellbinding whisper of a voice not only to describe the courtship rituals of birds of paradise, but also to repeatedly sound the alarm about climate change. Read more from The Washington Post at the link in our bio. #news #climate #davidattenborough",
+      "posted_at": "20260508"
+    }
   ]
 }

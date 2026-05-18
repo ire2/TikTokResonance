@@ -55,6 +55,8 @@ def test_analyze_pasted_idea_uses_local_segments_and_label_evidence(tmp_path):
     assert result["creator_id"] == creator_id
     assert result["analysis_mode"] == "local_segment_overlap"
     assert result["resonance"]["resonance_score"] > 0
+    assert result["resonance"]["raw_match_score"] > 0
+    assert result["resonance"]["resonance_score"] >= result["resonance"]["raw_match_score"]
     assert result["evidence"][0]["video_id"] == "v1"
     assert result["hit_evidence"][0]["video_id"] == "v1"
     assert result["miss_evidence"][0]["video_id"] == "v2"

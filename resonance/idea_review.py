@@ -151,6 +151,21 @@ def _score_weight_for_confidence(confidence_level: str) -> float:
     }.get(confidence_level, 0.68)
 
 
+def _calibrated_fit_score(raw_score: float, confidence_level: str) -> float:
+    raw_score = max(0.0, min(1.0, float(raw_score or 0.0)))
+    if raw_score >= 0.35:
+        calibrated = 0.75 + min((raw_score - 0.35) / 0.25, 1.0) * 0.15
+    elif raw_score >= 0.20:
+        calibrated = 0.58 + ((raw_score - 0.20) / 0.15) * 0.17
+    elif raw_score >= 0.08:
+        calibrated = 0.34 + ((raw_score - 0.08) / 0.12) * 0.24
+    else:
+        calibrated = raw_score * 4.25
+
+    confidence_weight = _score_weight_for_confidence(confidence_level)
+    return round(calibrated * confidence_weight, 4)
+
+
 def _labeled_evidence(
     *,
     creator_id: str,
@@ -272,9 +287,13 @@ def analyze_pasted_idea(
     semantic_alignment = (
         round(sum(top_scores) / len(top_scores), 4) if top_scores else 0.0
     )
-    resonance_score = round(
+    raw_match_score = round(
         semantic_alignment * _score_weight_for_confidence(creator["confidence_level"]),
         4,
+    )
+    resonance_score = _calibrated_fit_score(
+        raw_match_score,
+        creator["confidence_level"],
     )
 
     hit_evidence = [
@@ -292,6 +311,7 @@ def analyze_pasted_idea(
 
     resonance = {
         "semantic_alignment": semantic_alignment,
+        "raw_match_score": raw_match_score,
         "format_alignment": None,
         "motion_alignment": None,
         "text_density_alignment": None,

@@ -1,0 +1,32 @@
+{
+  "7609177768793787679": {
+    "label_queue_seed": true,
+    "motion_intensity": null,
+    "text_density_heuristic": null,
+    "source": "downloaded_video_for_labeling_demo"
+  },
+  "7612856112412495134": {
+    "label_queue_seed": true,
+    "motion_intensity": null,
+    "text_density_heuristic": null,
+    "source": "downloaded_video_for_labeling_demo"
+  },
+  "7637188014405455117": {
+    "label_queue_seed": true,
+    "motion_intensity": null,
+    "text_density_heuristic": null,
+    "source": "downloaded_video_for_labeling_demo"
+  },
+  "7637149430356937998": {
+    "label_queue_seed": true,
+    "motion_intensity": null,
+    "text_density_heuristic": null,
+    "source": "downloaded_video_for_labeling_demo"
+  },
+  "7637520530622401805": {
+    "label_queue_seed": true,
+    "motion_intensity": null,
+    "text_density_heuristic": null,
+    "source": "downloaded_video_for_labeling_demo"
+  }
+}

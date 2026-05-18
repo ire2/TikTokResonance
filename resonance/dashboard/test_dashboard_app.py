@@ -98,7 +98,13 @@ def test_dashboard_page_exposes_human_review_controls():
     assert "Human Decision" in response.text
     assert "decision-approve" in response.text
     assert "ideaInput" in response.text
+    assert "videoInput" in response.text
+    assert "/api/video-review" in response.text
     assert "reviewNotes" in response.text
+    assert "Transcript & Content Readout" in response.text
+    assert "transcriptPanel" in response.text
+    assert "View transcript/data" in response.text
+    assert "compactEvidenceText" in response.text
 
 
 def test_creator_library_endpoint_returns_curated_cohort(tmp_path, monkeypatch):
@@ -131,6 +137,163 @@ def test_paste_idea_endpoint_returns_local_review_payload(tmp_path, monkeypatch)
     assert data["analysis_mode"] == "local_segment_overlap"
     assert data["creator_id"] == "expoparker"
     assert data["evidence"][0]["performance_label"] == "hit"
+
+
+def test_demo_idea_endpoint_masks_explicit_evidence_text(tmp_path, monkeypatch):
+    creator_id = _write_creator_fixture(tmp_path)
+    segments_path = tmp_path / "embeddings_store" / f"{creator_id}_BAAI_test.segments.json"
+    segments = json.loads(segments_path.read_text(encoding="utf-8"))
+    segments[0]["text"] = "A sharp fucking joke about awkward dating advice."
+    segments_path.write_text(json.dumps(segments), encoding="utf-8")
+
+    monkeypatch.setattr(dashboard_app, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(dashboard_app, "DEMO_MODE", True)
+
+    response = TestClient(dashboard_app.app).post(
+        "/api/idea-review",
+        json={
+            "creator_id": "expoparker",
+            "idea_text": "A sharp awkward dating joke with a clear setup.",
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["presentation_safe_text"] is True
+    assert "fucking" not in response.text.lower()
+    assert "f******" in data["evidence"][0]["text"]
+
+
+def test_video_review_endpoint_scores_uploaded_transcript(tmp_path, monkeypatch):
+    _write_creator_fixture(tmp_path)
+    draft_path = tmp_path / "drafts" / "expoparker_draft.yaml"
+    draft_path.write_text(
+        "\n".join([
+            "creator_id: expoparker",
+            "observed_patterns:",
+            "  dominant_formats:",
+            "    - skit_or_comedy",
+            "visual_signals:",
+            "  avg_motion_intensity: 0.2",
+            "  avg_text_density_heuristic: 0.3",
+        ]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(dashboard_app, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(dashboard_app, "DRAFTS_DIR", tmp_path / "drafts")
+    monkeypatch.setattr(dashboard_app, "TEST_VIDEO_DIR", tmp_path / "test" / "video")
+    monkeypatch.setattr(
+        dashboard_app,
+        "_extract_idea_text",
+        lambda video_path: "A sharp awkward dating joke with a clear setup.",
+    )
+    monkeypatch.setattr(
+        dashboard_app,
+        "extract_visual_signals",
+        lambda *args, **kwargs: {
+            "motion_intensity": 0.25,
+            "text_density_heuristic": 0.4,
+        },
+    )
+
+    response = TestClient(dashboard_app.app).post(
+        "/api/video-review",
+        data={"creator_id": "expoparker"},
+        files={"video": ("clip.mp4", b"fake video bytes", "video/mp4")},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["analysis_mode"] == "uploaded_video_transcript"
+    assert data["creator_id"] == "expoparker"
+    assert data["evidence"][0]["performance_label"] == "hit"
+    assert data["video_path"].endswith("clip.mp4")
+    assert data["transcript_readout"]["summary"].startswith(
+        "The clip reads as a short spoken"
+    )
+    assert data["transcript_readout"]["paragraphs"][0].startswith("A sharp awkward")
+    assert data["transcript_readout"]["word_count"] > 0
+    assert data["resonance"]["format_alignment"] == 1.0
+    assert data["resonance"]["motion_alignment"] == 0.95
+    assert data["resonance"]["text_density_alignment"] == 0.9
+    assert data["inferred_format"] == "skit_or_comedy"
+    assert data["upload_metric_sources"]["format"] == "uploaded_transcript_keywords"
+
+
+def test_video_review_warns_when_uploaded_source_creator_differs_from_target(tmp_path, monkeypatch):
+    for dirname in ["drafts", "labels", "raw_captions", "raw_visual", "embeddings_store"]:
+        (tmp_path / dirname).mkdir(parents=True, exist_ok=True)
+    (tmp_path / "drafts" / "cleoabram_draft.yaml").write_text(
+        "\n".join([
+            "creator_id: cleoabram",
+            "observed_patterns:",
+            "  dominant_formats:",
+            "    - educational",
+            "visual_signals:",
+            "  avg_motion_intensity: 0.2",
+            "  avg_text_density_heuristic: 0.3",
+        ]),
+        encoding="utf-8",
+    )
+    (tmp_path / "drafts" / "gray.davis_draft.yaml").write_text(
+        "\n".join([
+            "creator_id: gray.davis",
+            "observed_patterns:",
+            "  dominant_formats:",
+            "    - food_or_cooking",
+            "visual_signals:",
+            "  avg_motion_intensity: 0.2",
+            "  avg_text_density_heuristic: 0.3",
+        ]),
+        encoding="utf-8",
+    )
+    (tmp_path / "labels" / "format_labels.csv").write_text(
+        "\n".join([
+            "creator_id,video_id,format_label,performance_label,tiktok_url",
+            "cleoabram,c1,educational,hit,https://www.tiktok.com/@cleoabram/video/c1",
+            "gray.davis,123,food_or_cooking,hit,https://www.tiktok.com/@gray.davis/video/123",
+        ]),
+        encoding="utf-8",
+    )
+    (tmp_path / "embeddings_store" / "cleoabram_BAAI_test.segments.json").write_text(
+        json.dumps([
+            {"video_id": "c1", "text": "A science explainer about space and technology."},
+        ]),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(dashboard_app, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(dashboard_app, "DRAFTS_DIR", tmp_path / "drafts")
+    monkeypatch.setattr(dashboard_app, "TEST_VIDEO_DIR", tmp_path / "test" / "video")
+    monkeypatch.setattr(
+        dashboard_app,
+        "_extract_idea_text",
+        lambda video_path: "Have you ever tried this fruit science technology from the garden?",
+    )
+    monkeypatch.setattr(
+        dashboard_app,
+        "extract_visual_signals",
+        lambda *args, **kwargs: {
+            "motion_intensity": 0.25,
+            "text_density_heuristic": 0.4,
+        },
+    )
+
+    response = TestClient(dashboard_app.app).post(
+        "/api/video-review",
+        data={"creator_id": "cleoabram"},
+        files={"video": ("gray.davis_123.mp4", b"fake video bytes", "video/mp4")},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["uploaded_format"]["source_creator_id"] == "gray.davis"
+    assert data["inferred_format"] == "food_or_cooking"
+    assert data["resonance"]["format_alignment"] == 0.35
+    assert data["resonance"]["resonance_score"] < data["upload_score_adjustment"]["original_score"]
+    assert data["upload_score_adjustment"]["reason"] == "source creator mismatch and low target format fit"
+    assert "gray.davis" in data["upload_warning"]
+    assert "cleoabram" in data["upload_warning"]
 
 
 def test_review_decision_endpoint_writes_local_artifact(tmp_path, monkeypatch):
@@ -181,3 +344,31 @@ def test_review_decision_endpoint_saves_pasted_idea_summary(tmp_path, monkeypatc
     assert saved[0]["source"] == "demo-local"
     assert saved[0]["creator_id"] == "expoparker"
     assert saved[0]["idea_snippet"].startswith("A sharp awkward dating joke")
+
+
+def test_review_decision_endpoint_can_save_current_upload_analysis(tmp_path, monkeypatch):
+    decisions_path = tmp_path / "decisions.jsonl"
+    monkeypatch.setattr(dashboard_app, "DEMO_MODE", True)
+    monkeypatch.setattr(dashboard_app, "REVIEW_DECISIONS_PATH", decisions_path)
+
+    response = TestClient(dashboard_app.app).post(
+        "/api/review-decision",
+        json={
+            "decision": "approve",
+            "notes": "Uploaded video fits the creator pattern.",
+            "analysis_payload": {
+                "creator_id": "expoparker",
+                "video_path": "data/test/video/uploads/clip.mp4",
+                "idea_text": "A sharp awkward dating joke with a clear setup.",
+                "analysis_mode": "uploaded_video_transcript",
+                "model_name": "local_segment_overlap",
+                "resonance": {"resonance_score": 0.42, "semantic_alignment": 0.5},
+                "evidence": [{"video_id": "v1"}],
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    saved = [json.loads(line) for line in decisions_path.read_text().splitlines()]
+    assert saved[0]["source"] == "demo-upload"
+    assert saved[0]["video_path"].endswith("clip.mp4")
